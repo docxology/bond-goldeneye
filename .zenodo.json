@@ -6,25 +6,19 @@
       "orcid": "0000-0001-6232-9096"
     }
   ],
-  "description": "Source code for Convergence Analysis of Gradient Descent Optimization (2026).",
+  "description": "GoldenEye: ARKANGEL — deterministic special-agent mission software modelling an orbital EMP weapon, electronics kill-radius analysis, and Arkangel dam-facility security (BOND film package).",
   "keywords": [
-    "optimization algorithms",
-    "gradient descent",
-    "convergence analysis",
-    "numerical methods",
-    "mathematical programming",
-    "reproducible research",
-    "infrastructure automation"
+    "orbital EMP",
+    "high-altitude electromagnetic pulse (HEMP)",
+    "electronics kill radius",
+    "vulnerability classes",
+    "dam security",
+    "breach flood risk",
+    "defense in depth",
+    "reproducible research"
   ],
   "license": "MIT",
-  "related_identifiers": [
-    {
-      "identifier": "10.5281/zenodo.20417136",
-      "relation": "isVersionOf",
-      "scheme": "doi"
-    }
-  ],
-  "title": "Convergence Analysis of Gradient Descent Optimization",
+  "title": "GoldenEye: ARKANGEL — Special-Agent Mission Software",
   "upload_type": "software",
-  "version": "2.5.2"
+  "version": "0.1.0"
 }

@@ -1,49 +1,29 @@
-domain: code_research
-display_name: Code Research Exemplar
-required_packages:
-  - numpy
-  - matplotlib
-  - pytest
-preferred_outputs:
-  - pdf
-  - html
-  - docx
-  - epub
-validation_gates:
-  - experiment_method_design
-  - artifact_manifest
-  - evidence_grounding
-  - render_validation
-  - publication_readiness
-figure_types:
-  - convergence_plot
-  - performance_benchmark
-  - sensitivity_analysis
-citation_policy: official_or_scholarly
-source_policy: "Prefer primary project outputs, official package documentation, and scholarly optimization references."
+# Advisory research-control profile for the goldeneye film package.
+# Declarative, validation-only overlay: this file does not execute agents.
+
+project: goldeneye
+mission: ARKANGEL
+
 review_gates:
-  - experiment_method_design
-  - render_validation
-  - publication_readiness
+  - "pytest --cov=src --cov-fail-under=90 (line + branch)"
+  - "ruff check and ruff format --check on src/ scripts/ tests/"
+  - "mypy on src/ scripts/"
+  - "zero-mock audit of tests/"
+  - "pure-domain core imports without bond-api (subprocess gate)"
+  - "manuscript token cross-reference (every section token is generated)"
+
+source_policy:
+  - "closed-form, published physics (Glasstone & Dolan 1977; IEC 61000-2-9; MIL-STD-188-125; Froehlich 1995; Ritter 1892)"
+  - "scenario parameters declared in manuscript/config.yaml; no untracked random reliance"
+  - "deterministic: fixed seed 0, no wall-clock in persisted analysis artifacts"
+
 artifact_expectations:
-  - output/data/manuscript_variables.json
-  - output/data/optimization_results.csv
-  - output/figures/convergence_plot.png
-  - output/reports/validation_report.json
-  - output/pdf/template_code_project_combined.pdf
+  - "src/goldeneye/{emp_model,kill_radius,dam_security,scenario}.py — pure domain core"
+  - "src/goldeneye/mission.py — frozen bond_api MissionProvider adapter + GadgetRegistry"
+  - "src/goldeneye/manuscript_variables.py + figures/ — manuscript hydration and concept figures"
+  - "scripts/{brief,recon,plan,execute,debrief,z_generate_manuscript_variables}.py — thin CLIs"
+  - "output/data/* and output/figures/* — regenerable, gitignored"
+
 benchmark_rubric:
-  name: code-research-readiness
-  dimensions:
-    - name: output_validity
-      weight: 1.0
-    - name: reproducibility_bundle
-      weight: 1.0
-    - name: artifact_manifest
-      weight: 1.0
-    - name: evidence_grounding
-      weight: 2.0
-    - name: render_success
-      weight: 1.0
-    - name: publication_readiness
-      weight: 1.0
-llm_prompt_guidance: "Use generated optimization artifacts and manuscript variables as the evidence source; do not invent numeric results."
+  prefer: "deterministic closed-form verification (known vectors, analytic limits, invariants)"
+  avoid: "nondeterministic RNG, wall-clock timing in persisted results, mock frameworks"

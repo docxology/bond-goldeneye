@@ -10,3 +10,12 @@ __pycache__/
 
 # Project-local virtualenvs (root .venv is shared)
 .venv/
+
+# mypy cache
+.mypy_cache/
+
+# Build artifacts
+build/
+
+# Generated artifacts — regenerate, never hand-edit
+output/

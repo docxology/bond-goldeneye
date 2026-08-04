@@ -1,53 +1,58 @@
 ---
 name: goldeneye
-description: Code-centric optimization research exemplar — gradient descent, convergence analysis, automated figures, dashboard, and publication-quality PDF.
+description: Use when building/maintaining the GoldenEye ARKANGEL BOND film package (orbital EMP, kill-radius, dam security).
 version: 0.1.0
-author: docxology
-license: MIT
-tags: [exemplar, code, optimization, thin-orchestrator]
+tags: [bond, goldeneye, emp, kill-radius, dam-security, mission-provider, deterministic]
 ---
 
-# goldeneye
+# goldeneye (BOND film package)
 
-Project-scoped skill for the in-repo exemplar at
-`projects/working/bond/goldeneye/`. Load this when working inside the project.
+GoldenEye: ARKANGEL — special-agent mission software for *GoldenEye* (1995).
+Implements the frozen `bond_api.MissionProvider` protocol over a pure,
+deterministic domain core.
 
-## When to Use
+## Modules
 
-- Working inside the `goldeneye` exemplar — running scripts, editing source,
-  or regenerating outputs.
-- Forking this exemplar as the starting scaffold for a new research project.
-- Validating that the exemplar's contracts (thin-orchestrator, layer boundaries,
-  no-mocks testing) still hold after changes.
+- `src/goldeneye/emp_model.py` — orbital EMP threat envelope `E0·Y_s·(h/d)²·exp(−(d−h)/λ(h))`,
+  horizon/line-of-sight, yield scaling, E1/E2/E3 normalized double-exponential waveform.
+- `src/goldeneye/kill_radius.py` — 4 vulnerability classes; kill radius by deterministic
+  bisection; area, footprint fraction, damage-probability logistic.
+- `src/goldeneye/dam_security.py` — defense-in-depth access control
+  (`1−Π(1−p_i)`), expected detection time, security score; Froehlich (1995)
+  peak outflow `Q_p=0.607 V^0.295 H^1.24`; Ritter (1892) dam-break
+  `h=(1/9g)(2c0−x/t)²`, front speed `2c0`, arrival `x/2c0`, asymptote `4H/9`.
+- `src/goldeneye/scenario.py` — `ARKANGEL` defaults, config loading,
+  `analyze_arkangel` (deterministic dict), SHA-256 `input_hash`.
+- `src/goldeneye/mission.py` — the ONLY `bond_api` import; `MissionProvider`
+  (brief/recon/plan/execute/debrief) + `GadgetRegistry` under `goldeneye`.
+- `src/goldeneye/manuscript_variables.py`, `figures/` — tokens + concept figures.
 
-## Quick Reference
+## Quick reference
 
 ```bash
-# From the repository root
-uv run pytest projects/working/bond/goldeneye/tests --cov=projects/working/bond/goldeneye/src --cov-fail-under=90
-uv run python scripts/pipeline/stage_02_analysis.py --project templates/goldeneye
-uv run python scripts/pipeline/stage_03_render.py --project templates/goldeneye
-uv run python scripts/pipeline/stage_04_validate.py --project templates/goldeneye
-uv run python scripts/pipeline/stage_05_copy.py --project templates/goldeneye
+cd projects/working/bond/goldeneye
+uv sync --extra dev
+uv run pytest tests/ --cov=src --cov-fail-under=90   # ≥90% line+branch
+uv run ruff check src/ scripts/ tests/ && uv run ruff format --check src/ scripts/ tests/
+uv run mypy src/ scripts/
+uv run python scripts/execute.py                      # analysis → output/data/
+uv run python scripts/z_generate_manuscript_variables.py  # tokens + figures
 ```
 
 ## Pitfalls
 
-- **Keep scripts thin.** Business logic belongs in `src/` or shared
-  `infrastructure/`, not in `scripts/`.
-- **No mocks.** All tests must use real data, real files, and real
-  computation.
-- **Outputs are disposable.** Never hand-edit `output/` — regenerate from
-  source and config.
-- **Keep tracked benchmarks deterministic.** Serialize reproducible inputs,
-  objective values, and checks; keep wall-clock timing as a runtime-only
-  diagnostic.
-- **Run from the repo root.** Commands assume the template monorepo root
-  as working directory unless the child `AGENTS.md` states otherwise.
+- Pure core (`emp_model`, `kill_radius`, `dam_security`, `scenario`) must NOT
+  import `bond_api`/`bond_utilities`. Only `mission.py` imports `bond_api`.
+  Verified by an in-process subprocess test.
+- `{{TOKEN}}` cross-ref scan covers `manuscript/[0-9][0-9]_*.md` only — keep
+  literal double-brace examples out of numbered sections.
+- Determinism: seed 0, no RNG, no wall-clock in persisted analysis. Two runs of
+  `analyze_arkangel(ARKANGEL)` must be byte-identical.
+- Scripts self-insert `src/` on `sys.path`; bootstrap imports need `# noqa: E402`
+  (ruff E402 does not auto-cover 4-level BOND script paths).
 
 ## Cross-refs
 
-- Project contract: [`AGENTS.md`](../../../AGENTS.md)
-- README: [`README.md`](../../../README.md)
-- TODO: [`TODO.md`](../../../TODO.md)
-- Exemplar roster: [`projects/AGENTS.md`](../../../../../AGENTS.md)
+- Root: `../../AGENTS.md`, `docs/agent_instructions.md` (read-first), `TODO.md`.
+- Protocol (frozen): external skill `bond-suite-package-development`
+  `references/bond-api-phase1.md`.

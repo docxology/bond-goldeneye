@@ -1,57 +1,84 @@
 claims:
-  - claim_id: figure-export-dpi
+  - claim_id: emp-e1-reference-vm
     kind: number
-    value: 300
-    source: projects/working/bond/goldeneye/src/viz_config.py plotting defaults (dpi)
+    value: 50000.0
+    source: src/goldeneye/emp_model.py E1_REFERENCE_VM (50 kV/m reference E1 amplitude)
     source_tier: project_source
     freshness: active
-    artifact_path: output/figures/convergence_plot.png
-  - claim_id: step-size-sensitivity-cap
+    artifact_path: manuscript/02_methodology.md
+  - claim_id: emp-gamma-yield-fraction
     kind: number
-    value: 500
-    source: projects/working/bond/goldeneye/src/sweeps.py sensitivity_sweep max_iter cap
+    value: 0.003
+    source: src/goldeneye/emp_model.py GAMMA_YIELD_FRACTION (Glasstone & Dolan prompt-gamma fraction)
+    source_tier: literature_cited
+    freshness: active
+    artifact_path: manuscript/02_methodology.md
+  - claim_id: emp-yield-scaling-exponent
+    kind: number
+    value: 0.85
+    source: src/goldeneye/emp_model.py YIELD_SCALING_EXPONENT (empirical E1 scaling)
+    source_tier: project_source
+    freshness: active
+  - claim_id: emp-nadir-field-arkangel
+    kind: number
+    value: 90125.0
+    source: src/goldeneye/scenario.py analyze_arkangel emp.nadir_field_vm (2 Mt @ 300 km)
     source_tier: generated_metric
     freshness: active
-    artifact_path: output/figures/step_size_sensitivity.png
-  - claim_id: stability-log-lower
+    artifact_path: manuscript/03_results.md
+  - claim_id: horizon-range-arkangel
     kind: number
-    value: -6
-    source: projects/working/bond/goldeneye/src/figures/scientific_stability.py stability visualization caption
-    source_tier: project_source
-    freshness: active
-    artifact_path: output/figures/stability_analysis.png
-  - claim_id: solution-relative-error-exponent
-    kind: number
-    value: -4
-    source: projects/working/bond/goldeneye/manuscript/03_results.md stated precision threshold
-    source_tier: manuscript_claim
+    value: 1978.0
+    source: src/goldeneye/emp_model.py ground_range_to_horizon_km (300 km burst)
+    source_tier: generated_metric
     freshness: active
     artifact_path: manuscript/03_results.md
-  - claim_id: stability-log-upper
+  - claim_id: kill-radius-unprotected
     kind: number
-    value: -9
-    source: projects/working/bond/goldeneye/src/figures/scientific_stability.py stability visualization caption
+    value: 1978.0
+    source: src/goldeneye/kill_radius.py kill_radius_km on ARKANGEL (horizon-saturated)
+    source_tier: generated_metric
+    freshness: active
+    artifact_path: manuscript/03_results.md
+  - claim_id: kill-radius-legacy-tube
+    kind: number
+    value: 0.0
+    source: src/goldeneye/kill_radius.py kill_radius_km (1 MV/m threshold > 90 kV/m nadir)
+    source_tier: generated_metric
+    freshness: active
+    artifact_path: manuscript/03_results.md
+  - claim_id: froehlich-coefficient
+    kind: number
+    value: 0.607
+    source: src/goldeneye/dam_security.py breach_peak_discharge_cms (Froehlich 1995 Q_p = 0.607 V^0.295 H^1.24)
+    source_tier: literature_cited
+    freshness: active
+    artifact_path: manuscript/02_methodology.md
+  - claim_id: ritter-depth-coefficient
+    kind: number
+    value: 0.4444
+    source: src/goldeneye/dam_security.py RITTER_DEPTH_COEFFICIENT (4/9, Ritter dam-break asymptote)
     source_tier: project_source
     freshness: active
-    artifact_path: output/figures/stability_analysis.png
-  - claim_id: benchmark-tolerance-exponent
+    artifact_path: manuscript/02_methodology.md
+  - claim_id: peak-discharge-arkangel
     kind: number
-    value: -10
-    source: projects/working/bond/goldeneye/scripts/optimization_analysis.py dimensional benchmark tolerance
-    source_tier: project_source
+    value: 31759.8
+    source: src/goldeneye/dam_security.py breach_peak_discharge_cms(1.3e8, 75) (m^3/s)
+    source_tier: generated_metric
     freshness: active
-    artifact_path: output/figures/performance_benchmark.png
-  - claim_id: benchmark-min-iterations
+    artifact_path: manuscript/03_results.md
+  - claim_id: flood-arrival-arkangel
     kind: number
-    value: 219
-    source: projects/working/bond/goldeneye/manuscript/03_results.md benchmark caption
-    source_tier: manuscript_claim
+    value: 2.458
+    source: src/goldeneye/dam_security.py flood_arrival_time_s at 8 km (min)
+    source_tier: generated_metric
     freshness: active
-    artifact_path: output/figures/performance_benchmark.png
-  - claim_id: benchmark-max-iterations
+    artifact_path: manuscript/03_results.md
+  - claim_id: access-detection-arkangel
     kind: number
-    value: 238
-    source: projects/working/bond/goldeneye/manuscript/03_results.md benchmark caption
-    source_tier: manuscript_claim
+    value: 0.987
+    source: src/goldeneye/dam_security.py cumulative_detection_probability (4 default layers)
+    source_tier: generated_metric
     freshness: active
-    artifact_path: output/figures/performance_benchmark.png
+    artifact_path: manuscript/03_results.md

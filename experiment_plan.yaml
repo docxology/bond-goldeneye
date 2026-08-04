@@ -1,25 +1,40 @@
-conditions:
-  - name: conservative_step
-    role: reference
-    description: "Stable gradient-descent step below the spectral bound."
-  - name: near_optimal_step
-    role: proposed
-    description: "Template-recommended step near the stable convergence region."
-  - name: aggressive_step
-    role: variant
-    description: "Stress condition near or above the stability boundary."
-metrics:
-  primary:
-    name: objective_value
-    direction: minimize
-protocol: "Run the deterministic quadratic optimization sweep with identical initialization, seeds, tolerance, and iteration cap across all declared step-size conditions."
+# ARKANGEL mission experiment plan (goldeneye film package).
+# Declarative, validation-only overlay: does not execute autonomous agents.
+
+mission: ARKANGEL
+film: GoldenEye (1995)
+
+scenario:
+  weapon_yield_kt: 2000.0
+  burst_altitude_km: 300.0
+  reservoir_volume_m3: 130000000.0
+  dam_head_m: 75.0
+  facility_distance_km: 8.0
+  facility_elevation_m: 10.0
+  access_layers: 4
+
+primary_metrics:
+  - "nadir E1 field (V/m) and horizon footprint (km, km^2)"
+  - "kill radius (km) and footprint fraction per vulnerability class"
+  - "breach peak discharge (m^3/s), flood arrival (min), inundation depth (m), risk rating"
+  - "defense-in-depth detection probability and composite security score"
+
 expected_figures:
-  - fig:convergence_plot
-  - fig:performance_benchmark
-  - fig:step_size_sensitivity
-expected_tables:
-  - tbl:optimization_results
-baselines:
-  - conservative_step
-ablations:
-  - aggressive_step
+  - id: emp_footprint
+    file: output/figures/emp_footprint.png
+    description: "EMP radial field profiles, kill radius vs altitude, damage probability, footprint vs yield"
+  - id: flood_wave
+    file: output/figures/flood_wave.png
+    description: "Ritter dam-break downstream profiles and facility inundation vs time"
+
+baseline:
+  - "unprotected microelectronics destroyed over the whole visible footprint"
+  - "legacy vacuum-tube electronics immune (kill radius 0 km)"
+
+ablation:
+  - "kill radius vs burst altitude (10-1000 km) for fixed yield"
+  - "kill-radius fraction vs yield (3-3000 kt) at fixed altitude"
+
+determinism:
+  seed: 0
+  input_hash: "SHA-256 of scenario_input_dict (sorted, compact JSON)"

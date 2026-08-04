@@ -1,5 +1,28 @@
-# Code-centric exemplar: optional monorepo adapters only.
-allow_infrastructure_imports:
-  - src/analysis/_infra.py
-  - src/_runtime.py
-  - src/benchmark_support.py
+# Manuscript layer contract — declarative record for the goldeneye package.
+# The goldeneye package follows the BOND suite layer contract. This file is a
+# declarative record, not an execution engine.
+
+layers:
+  pure_domain:
+    - emp_model
+    - kill_radius
+    - dam_security
+    - scenario
+  protocol_adapter:
+    - mission
+  manuscript:
+    - manuscript_variables
+  figures:
+    - figures
+
+rules:
+  - "pure_domain modules must not import bond-api or any BOND layer; they are importable without the suite installed"
+  - "protocol_adapter (mission.py) is the only src module that imports bond-api"
+  - "scripts/ are thin orchestrators; business logic lives in src/goldeneye"
+  - "live counts (test totals, coverage) are generated into docs/_generated/COUNTS.md and never hardcoded in prose"
+
+verification:
+  - "pytest --cov=src --cov-fail-under=90"
+  - "ruff check + ruff format on src/ scripts/ tests/"
+  - "mypy on src/ scripts/"
+  - "zero-mock audit of tests/"

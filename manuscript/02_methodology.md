@@ -1,83 +1,65 @@
-# Methodology {#sec:methodology}
+# Methodology
 
-This section describes the implementation methodology, explicitly detailing how the optimization algorithms are constructed, validated, and analyzed using the Generalized Research Template's `infrastructure` and `tests` ecosystems.
+## Orbital EMP weapon model (`src/goldeneye/emp_model.py`)
 
-## Algorithm Implementation
+A high-altitude nuclear burst (HEMP) releases a prompt gamma flux; the gammas
+Compton-scatter in the atmosphere, driving a radial electron current that
+radiates the early-time (E1) electromagnetic pulse. We model the ground-level
+E1 peak field as a documented conservative point-source envelope:
 
-### Gradient Descent Algorithm
+$$E(r) = E_0 \, Y_s \, \left(\frac{h}{d}\right)^2 \exp\!\left(-\frac{d-h}{\lambda(h)}\right),$$
 
-The core algorithm implements the iterative procedure for unconstrained optimization. The [`optimizer` module](https://github.com/docxology/template/blob/main/projects/working/bond/goldeneye/src/optimizer.py) uses the standard-library `logging` logger for optional verbose diagnostics; the [analysis orchestrator](https://github.com/docxology/template/blob/main/projects/working/bond/goldeneye/scripts/optimization_analysis.py) uses `infrastructure.core.logging.utils.get_logger`. Tests run under the hermetic boundaries defined in the [test configuration](https://github.com/docxology/template/blob/main/projects/working/bond/goldeneye/tests/conftest.py).
+where $h$ is the burst altitude, $d = \sqrt{h^2 + r^2}$ the slant range to a
+ground point at horizontal range $r$, $Y_s = (Y/Y_\text{ref})^{0.85}$ the
+empirical yield scaling, and $\lambda(h)$ the effective gamma attenuation
+length, which grows exponentially with altitude (thinner air). Reflecting the
+finiteness of the deposition region, the amplitude anchor is
+$E_0 = 50000$ V/m at a megaton-class reference yield, matching the canonical
+HEMP figure; the prompt-gamma fraction is fixed at 0.3% (Glasstone and Dolan,
+1977). Beyond line of sight the field is taken as zero, which bounds the
+illuminated footprint to the geometric horizon
+$\sqrt{2 R_\oplus h + h^2}$.
 
-**Algorithm — Gradient Descent (implemented in the [optimizer module](https://github.com/docxology/template/blob/main/projects/working/bond/goldeneye/src/optimizer.py#L87-L173))**
+The package also implements the canonical waveform as a normalized
+double-exponential, $E(t) = A\,k\,(e^{-\alpha t}-e^{-\beta t})$, with the
+early-time (E1), intermediate-time (E2), and late-time magnetohydrodynamic
+(E3) components distinguished by documented rate constants (IEC 61000-2-9 for
+E1) and amplitude policies.
 
-> **Input:** Initial point $x_0$, step size $\alpha$, tolerance $\epsilon$, max iterations $N_{\max}$
->
-> 1. Initialize $k \leftarrow 0$
-> 2. **While** $k < N_{\max}$ **do:**
->    - Compute gradient $g_k = \nabla f(x_k)$
->    - **If** $\|g_k\|_2 < \epsilon$ **then return** $x_k$ *(converged)*
->    - Update: $x_{k+1} \leftarrow x_k - \alpha \cdot g_k$
->    - $k \leftarrow k + 1$
-> 3. **Return** $x_k$ *(max iterations reached)*
+## Electronics kill-radius analysis (`src/goldeneye/kill_radius.py`)
 
-## Infrastructure Integration
+Four vulnerability classes are defined by increasing damage thresholds:
+*unprotected* microelectronics (~1 kV/m), *commercial*/semi-hardened
+(~10 kV/m), *MIL-STD-188-125*-hardened facilities (50 kV/m), and *legacy
+vacuum-tube*/relay electronics (~1 MV/m). Because the E1 envelope is monotone
+decreasing in range, the kill radius — the range at which the field meets the
+class threshold — is found by deterministic bisection. The enclosed kill area
+is $\pi r^2$, and the fraction of the illuminated footprint covered is
+$(r/r_\text{horizon})^2$. A smooth damage-probability logistic,
+$P = \bigl[1+\exp(-s(E/T-1))\bigr]^{-1}$, gives $P=0.5$ exactly at the damage
+threshold.
 
-The methodology explicitly bridges theoretical mathematics with production-grade validation through the `infrastructure.scientific` module.
+## Arkangel dam security (`src/goldeneye/dam_security.py`)
 
-### Numerical Stability Analysis
+**Access control (defense in depth).** The facility is modelled as a cascade
+of $n$ layers, each with a per-pass detection probability $p_i$ and response
+time $t_i$. The probability of at least one detection is
+$1-\prod_i(1-p_i)$; the expected response time to the first detecting layer
+weights each $p_i \prod_{j<i}(1-p_j)$ by $t_i$. A composite security score
+blends detection coverage with responsiveness in $[0,100]$.
 
-Rather than writing ad-hoc validation code, the project imports `infrastructure.scientific.stability.check_numerical_stability`. This utility subjects the objective function to a barrage of extreme inputs (NaN, Inf, $\pm 10^{10}$) to calculate a formalized stability score. If this score degrades, the [analysis orchestrator](https://github.com/docxology/template/blob/main/scripts/pipeline/stage_02_analysis.py) execution deliberately aborts, ensuring the methodology cannot enter unrecoverable states.
+**Breach flood risk.** A dam breach releases a flood wave. Peak outflow
+follows the published Froehlich (1995) embankment regression (Froehlich, 1995):
+$$Q_p = 0.607\, V^{0.295} H^{1.24},$$
+with reservoir volume $V$ and breach head $H$ in SI units. Downstream
+propagation uses the Ritter (1892) instantaneous dam-break solution on a dry,
+frictionless bed (Ritter, 1892): with $c_0=\sqrt{gH}$, the depth and velocity in the
+wave region $(-c_0 \le x/t \le 2c_0)$ are
 
-### Performance Benchmarking
+$$h(x,t) = \frac{1}{9g}\left(2c_0 - \frac{x}{t}\right)^2, \qquad
+u(x,t) = \frac{2}{3}\left(c_0 + \frac{x}{t}\right),$$
 
-The analysis exercises [`infrastructure.scientific.benchmarking.benchmark_function`](https://github.com/docxology/template/blob/main/infrastructure/scientific/benchmarking.py) as a runtime diagnostic. Host-dependent timing and memory observations are logged but excluded from tracked evidence. The canonical report records fixed inputs and exact objective values, while the dimensional figure reports deterministic convergence iterations and the proxy $d \times \text{iterations}$; neither surface claims that one host run proves an asymptotic bound.
-
-## Convergence Analysis
-
-For quadratic functions $f(x) = \frac{1}{2}x^T A x - b^T x$ where $A$ is positive definite, the convergence factor becomes [@bertsekas1999nonlinear]:
-
-\begin{equation}
-\label{eq:convergence_factor}
-\rho = \frac{|\lambda_{\max} - \alpha\lambda_{\min}|}{|\lambda_{\min} + \alpha\lambda_{\max}|}
-\end{equation}
-
-Optimal convergence occurs when $\alpha = \frac{2}{\lambda_{\min} + \lambda_{\max}}$, yielding $\rho = \frac{\kappa - 1}{\kappa + 1}$.
-
-## Experimental Setup
-
-### Step Size Analysis
-
-Step sizes are not chosen ad hoc in the manuscript: they are read from `experiment.step_sizes` in `manuscript/config.yaml` and passed through `run_convergence_experiment()` in `src/analysis/` (entry: `scripts/optimization_analysis.py`). The active grid for this build is:
-
-{{CONFIG_STEP_SIZES_BULLETS}}
-
-Labels follow the same agency taxonomy used for plot colours (`_agency_category` in the analysis script): **conservative** (small $\alpha$, slow but stable on $H=I$), **near-optimal** (including $\alpha=1$ where the method reaches $x^\ast$ in one step for this quadratic), **aggressive** ($1 < \alpha < 2$, still linearly contracting in $|x-x^\ast|$ but oscillatory in sign), and **divergent** ($|1-\alpha| \geq 1$).
-
-### Zero-Mock Testing Methodology
-
-The most critical aspect of the project's methodology is its validation framework. The project is governed by a strict Zero-Mock testing policy, evaluated actively by executing `uv run pytest projects/working/bond/goldeneye/tests/` during the infrastructure build phase.
-
-1. **Project tests**: [`projects/working/bond/goldeneye/tests/test_optimizer.py`](../tests/test_optimizer.py) exercises `src/optimizer.py` (typical, edge, boundary, and pathological inputs including NaN/Inf and zero gradients) and, when infrastructure imports succeed, call into `optimization_analysis.py` helpers—without mocks. Suite size: [`docs/_generated/COUNTS.md`](../../../../docs/_generated/COUNTS.md).
-2. **Infrastructure validation**: The repository-level `tests/infra_tests/` suite validates shared template modules (e.g. pipeline and discovery helpers) independently of this project’s manuscript.
-3. **Coverage Gates**: The [GitHub Actions CI workflow](https://github.com/docxology/template/blob/main/.github/workflows/ci.yml) enforces a mandatory ≥90% statement coverage gate on `projects/working/bond/goldeneye/src/` prior to treating the project as build-green.
-
-### Stopping rule and reporting
-
-`gradient_descent()` terminates when $\|\nabla f(x_k)\|$ falls below `experiment.tolerance`, when $k$ reaches `experiment.max_iterations`, or when an objective, gradient, or update becomes non-finite. The boolean `converged` plus `termination_reason` in exported CSV rows distinguish these outcomes. A non-finite candidate is rejected before it enters `objective_history`, preserving the last finite state for reproducible reporting. Downstream, `scripts/z_generate_manuscript_variables.py` aggregates the CSV into `RESULT_*` placeholders so tables and prose cannot drift from the last analysis run.
-
-### Figure generation contract
-
-Each figure in `03_results.md` maps to a generator in `src/figures/` (`generate_convergence_plot`, `generate_step_size_sensitivity_plot`, `generate_convergence_rate_plot`, `generate_complexity_visualization`, `generate_stability_visualization`, `generate_benchmark_visualization`), orchestrated by `src/analysis/` / `scripts/optimization_analysis.py`. Captions in the markdown intentionally name the function and the key parameters (tolerance lines, grids, dimensions) so reviewers can navigate from PDF to code without inferring hidden defaults.
-
-The same generator writes explicit `metadata.alt_text` for every registered
-figure. The alt text states what the visual encodes and preserves the boundary
-between deterministic observations and host-dependent diagnostics. Run the
-opt-in publication migration gate with
-`--require-figure-accessibility` to verify that every referenced figure has
-this metadata before promotion.
-
-## Analysis Pipeline & LaTeX Integration
-
-The automated analysis script leverages [`infrastructure.core.progress`](https://github.com/docxology/template/blob/main/infrastructure/core/progress.py) (`ProgressBar`, `SubStageProgress`) to orchestrate experiments, collect convergence trajectories, and generate publication-quality visualizations seamlessly.
-
-The research template supports advanced LaTeX customization through the `preamble.md` configuration. This is ingested directly by `infrastructure.rendering.latex_utils.py` and `pdf_renderer.py`, automatically linking compiled PGF plots and BibTeX citations. This automated approach ensures an unbreakable chain of custody from raw algorithmic execution to the final rendered manuscript.
+the front arrives at a downstream distance $x$ at time $x/(2c_0)$, and the
+asymptotic peak depth at any fixed distance is $4H/9$. The facility inundation
+severity is the mean depth over its ground elevation, binned into a
+low/moderate/high/extreme risk rating.

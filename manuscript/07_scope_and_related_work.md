@@ -1,24 +1,41 @@
-# Scope, Related Work, and Positioning {#sec:scope}
+# Scope and related work
 
-This section situates the exemplar scientifically and states explicit boundaries. The goal is not to compete with monographs on nonlinear programming [@nocedal2006numerical; @bertsekas1999nonlinear], but to show how a minimal, test-backed optimization story fits the template's reproducibility and rendering stack [@peng2011reproducible].
+## Scope
 
-## Classical gradient methods
+This package models three specific systems from *GoldenEye* (1995) with
+closed-form, deterministic approximations. It is engineering mission software,
+not a predictive defence-physics code, and its honesty about assumptions is
+part of the deliverable.
 
-Smooth unconstrained minimization via first-order updates has a long lineage, from Cauchy's early descent perspective [@cauchy1847methode] to modern treatments of convex problems [@boyd2004convex] and accelerated gradient schemes [@nesterov2013gradient]. Polyak's classical discussion of gradient convergence factors remains relevant when interpreting empirical iteration counts [@polyak1964some]. The present manuscript restricts attention to **fixed-step** gradient descent on a **convex quadratic**, where rates reduce to scalar linear recurrences in the error ([@sec:results], [@eq:scalar_linear_update]).
+**EMP envelope.** The ground field is a *conservative point-source envelope*.
+It omits the full distributed-source HEMP field computation, polarization and
+coupling detail, and site-specific shielding/cable-coupling response. Because
+it treats the source as a point, the kill footprint it yields is smaller than
+a detailed code would predict — deliberately the conservative direction for a
+damage assessment. Waveform components E1/E2/E3 use documented representative
+rate constants; E2 is not standardized (IEC defines E1 most strictly) and its
+amplitude fraction is an engineering default.
 
-## Adaptive and stochastic extensions
+**Kill radius.** Vulnerability-class thresholds are engineering references
+from the EMP-hardening literature (e.g. MIL-STD-188-125 for the 50 kV/m E1
+hardness level), not guarantees for specific equipment under specific coupling
+conditions. Damage probability is a smooth surrogate, not a validated
+reliability model.
 
-Practical machine-learning optimizers (e.g., Adam [@kingma2014adam]) introduce momentum, adaptive preconditioning, or noise from minibatching. Those methods are **out of scope** for `goldeneye`: the exemplar deliberately keeps the algorithm minimal so that failures (divergent $\alpha$, iteration caps) are interpretable without confounding from stochastic sampling or line-search logic.
+**Dam breach.** The Ritter solution assumes an instantaneous, complete breach
+on a dry, frictionless, prismatic bed. Real dam failures evolve over minutes
+with friction and valley geometry, so arrival times here are lower bounds and
+depths are idealizations. The Froehlich regression is a statistical peak-
+outflow relation and carries scatter.
 
-## What this project proves about the template
+## Related work
 
-The scientific claims through [@sec:introduction], [@sec:methodology], and [@sec:results] are standard textbook material. The **non-standard** contribution is procedural: configuration in `manuscript/config.yaml` drives `run_convergence_experiment()`, figures, CSV exports, and `RESULT_*` token substitution (`scripts/z_generate_manuscript_variables.py`) so that PDF, HTML, and validation logs refer to the same numbers. That pattern is what downstream projects should copy—whether the domain is optimization, differential equations, or Bayesian workflows.
-
-## Explicit limitations
-
-1. **Dimensionality**: Default experiments emphasize $d = 1$ with $A = I$ for transparent plotting; the benchmark figure explores $d > 1$ only with identity Hessians, so no ill-conditioning effects appear.
-2. **Step-size policy**: Only constant $\alpha$ is implemented in `src/optimizer.py`; there is no Wolfe or Armijo backtracking.
-3. **Global optimization**: Convexity is assumed; no basin-hopping or restarts are studied.
-4. **Numerical model**: Double-precision floating point only; no interval or arbitrary-precision analysis.
-
-These limitations are intentional: they narrow the failure surface so that infrastructure concerns—tests, logging, figure registration, and PDF cross-references—remain visible rather than buried under algorithmic complexity.
+The models sit on well-established foundations. High-altitude EMP is treated
+in the canonical reference *The Effects of Nuclear Weapons* (Glasstone and
+Dolan, 1977), and the early-time waveform shape follows IEC 61000-2-9. Peak
+dam-breach outflow is regressed by Froehlich (1995); the classical
+instantaneous dam-break solution originates with Ritter (1892) and is
+presented textually in Stoker's *Water Waves* (1957). Defense-in-depth
+detection probability is the standard layered-reliability formula. The BOND
+protocol itself is specified in the frozen `bond-api` package; this package is
+one of many films implementing that contract.
