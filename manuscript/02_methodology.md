@@ -94,8 +94,8 @@ enclosures. Skin depth follows the classical $\delta = \sqrt{\rho/(\pi f \mu_0 \
 Schelkunoff (1943) shielding effectiveness combines plane-wave absorption
 $A = {{GE_ABSORPTION_DB_PER_SKIN_DEPTH}}\,t/\delta$ dB with reflection
 
-$$R = 20\log_{10}\frac{\eta_0}{4\,|Z_s|}\ \text{dB}, \qquad
-|Z_s| = \sqrt{2\pi f \mu_0 \mu_r \rho},$$
+$$R = 20\log_{10}\frac{\eta_0}{4\,\lvert Z_s \rvert}\ \text{dB}, \qquad
+\lvert Z_s \rvert = \sqrt{2\pi f \mu_0 \mu_r \rho},$$
 
 where $\eta_0 =$ **{{GE_FREE_SPACE_IMPEDANCE_OHM}}** $\Omega$ is the
 free-space wave impedance and $Z_s$ the conductor surface impedance
