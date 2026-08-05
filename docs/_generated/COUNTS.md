@@ -8,8 +8,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Tests passed | 161 |
-| Branch coverage (src/) | 97.44% |
+| Tests passed | 264 |
+| Branch coverage (src/) | 95.77% |
 | Coverage floor | 90% (line + branch) |
 | Gate result | PASS |
 
@@ -17,13 +17,18 @@
 
 | Module | Coverage |
 | --- | --- |
-| `src/goldeneye/mission.py` | 100% |
 | `src/goldeneye/figures/emp_footprint.py` | 100% |
 | `src/goldeneye/figures/flood_wave.py` | 100% |
+| `src/goldeneye/figures/grid_resilience.py` | 100% |
 | `src/goldeneye/emp_model.py` | 99.15% |
 | `src/goldeneye/kill_radius.py` | 98.04% |
-| `src/goldeneye/manuscript_variables.py` | 95.89% |
-| `src/goldeneye/scenario.py` | 95.83% |
+| `src/goldeneye/breach_hydrograph.py` | 97.06% |
+| `src/goldeneye/manuscript_variables.py` | 96.20% |
+| `src/goldeneye/orbital_mechanics.py` | 96.72% |
 | `src/goldeneye/dam_security.py` | 95.06% |
+| `src/goldeneye/grid_resilience.py` | 93.43% |
+| `src/goldeneye/coupling.py` | 92.59% |
+| `src/goldeneye/scenario.py` | 92.90% |
+| `src/goldeneye/mission.py` | 92.86% |
 
-Zero mocks; deterministic; pure-core verified importable without bond-api.
+Zero mocks; deterministic; pure core verified importable without bond-api.

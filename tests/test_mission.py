@@ -43,9 +43,9 @@ class TestProtocolConformance:
         assert isinstance(brief, MissionBrief)
         assert brief.film == "goldeneye"
         assert brief.codename == "ARKANGEL"
-        assert len(brief.objectives) == 3
+        assert len(brief.objectives) == 5
         assert len(brief.assets) == 2
-        assert len(brief.constraints) >= 2
+        assert len(brief.constraints) == 3
 
     def test_recon_shape(self) -> None:
         report = MissionProvider().recon(ReconRequest(goal="test goal"))
@@ -56,9 +56,19 @@ class TestProtocolConformance:
         provider = MissionProvider()
         plan = provider.plan(provider.brief())
         assert isinstance(plan, MissionPlan)
-        assert len(plan.steps) == 5
+        assert len(plan.steps) == 9
         names = [s.name for s in plan.steps]
-        assert names == ["emp", "kill_radius", "dam_security", "flood_risk", "synthesize"]
+        assert names == [
+            "emp",
+            "kill_radius",
+            "orbit",
+            "coupling",
+            "grid",
+            "dam_security",
+            "flood_risk",
+            "hydrograph",
+            "synthesize",
+        ]
 
     def test_execute_outcome(self) -> None:
         provider = MissionProvider()
@@ -74,7 +84,7 @@ class TestProtocolConformance:
         outcome = provider.execute(provider.plan(provider.brief()))
         debrief = provider.debrief(outcome)
         assert isinstance(debrief, Debrief)
-        assert len(debrief.lessons) == 4
+        assert len(debrief.lessons) == 6
 
     def test_run_mission_full_flow_order(self) -> None:
         debrief = run_mission(MissionProvider(), ReconRequest(goal="assess"))
@@ -101,10 +111,23 @@ class TestGadgets:
             "vulnerability_classes",
             "kill_radius_km",
             "damage_probability",
+            "circular_orbit_period_s",
+            "elevation_angle_deg",
+            "overhead_pass_duration_s",
+            "skin_depth_m",
+            "schelkunoff_se_db",
+            "induced_voltage_v",
+            "protection_margin_db",
+            "node_survival_probability",
+            "most_reliable_path",
+            "edge_disjoint_path_count",
             "breach_peak_discharge",
             "ritter_depth",
             "cumulative_detection",
+            "breach_average_width_m",
+            "triangular_hydrograph",
         }
+        assert len(registered) == 20
         assert expected <= registered
 
     def test_gadget_callables_work(self) -> None:
@@ -182,3 +205,55 @@ class TestPureCoreWithoutBondApi:
 
         mission = importlib.import_module("goldeneye.mission")
         assert hasattr(mission, "MissionProvider")
+
+
+class TestDeepenedResults:
+    def test_results_include_new_sections(self) -> None:
+        provider = MissionProvider()
+        results = provider.execute(provider.plan(provider.brief())).results
+        assert set(results) >= {"orbit", "coupling", "grid", "hydrograph"}
+        assert results["steps_completed"] == 9
+
+    def test_grid_results_present(self) -> None:
+        results = MissionProvider().execute(MissionProvider().plan(MissionProvider().brief())).results
+        assert results["grid"]["down_nodes"] == ("town_a", "relay")
+        assert results["grid"]["min_disjoint_paths"] >= 2
+
+    def test_debrief_mentions_grid(self) -> None:
+        provider = MissionProvider()
+        debrief = provider.debrief(provider.execute(provider.plan(provider.brief())))
+        assert any("grid" in lesson for lesson in debrief.lessons)
+
+    def test_execute_deterministic_still(self) -> None:
+        provider = MissionProvider()
+        plan = provider.plan(provider.brief())
+        assert provider.execute(plan).results == provider.execute(plan).results
+
+
+class TestPureCoreDeepened:
+    def test_all_new_modules_import_without_bond_api(self) -> None:
+        code = (
+            "import sys\n"
+            "from goldeneye.orbital_mechanics import circular_orbit_period_s, orbital_radius_m\n"
+            "from goldeneye.coupling import skin_depth_m, schelkunoff_se_db\n"
+            "from goldeneye.grid_resilience import GridNode, GridLine, PowerGrid\n"
+            "from goldeneye.breach_hydrograph import Station, breach_hydrograph_report\n"
+            "from goldeneye.scenario import analyze_arkangel, ARKANGEL\n"
+            "assert 'bond_api' not in sys.modules\n"
+            "assert 'bond_utilities' not in sys.modules\n"
+            "assert circular_orbit_period_s(orbital_radius_m(300000.0)) > 4000\n"
+            "assert skin_depth_m(1e6, 1.68e-8) > 0\n"
+            "assert analyze_arkangel(ARKANGEL)['grid']['min_disjoint_paths'] >= 1\n"
+            "print('deep-core-ok')\n"
+        )
+        import subprocess
+
+        proc = subprocess.run(
+            [sys.executable, "-c", code],
+            cwd=str(PROJECT_ROOT),
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert proc.returncode == 0, proc.stderr
+        assert "deep-core-ok" in proc.stdout

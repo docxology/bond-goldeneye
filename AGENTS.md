@@ -10,7 +10,7 @@ hardcoded).
 
 | Surface | Rule |
 | --- | --- |
-| `src/goldeneye/emp_model.py`, `kill_radius.py`, `dam_security.py`, `scenario.py` (pure core) | Deterministic closed-form math. No `bond_api` / `bond_utilities` imports; importable without the suite. |
+| `src/goldeneye/{emp_model,kill_radius,dam_security,orbital_mechanics,coupling,grid_resilience,breach_hydrograph,scenario}.py` (pure core) | Deterministic closed-form math. No `bond_api` / `bond_utilities` imports; importable without the suite. |
 | `src/goldeneye/mission.py` (protocol adapter) | The only `src` module that imports `bond_api`; implements the frozen `MissionProvider` + registers gadgets. |
 | `src/goldeneye/manuscript_variables.py`, `figures/` | Manuscript hydration + concept figures. |
 | `scripts/` | Thin orchestrators (one per mission phase); no business logic. |
@@ -28,10 +28,20 @@ pure-core-without-bond-api subprocess test).
 * **`kill_radius.py` — Electronics kill-radius.** Four vulnerability classes;
   deterministic bisection kill radius, kill area, footprint fraction, and a
   smooth damage-probability logistic.
+* **`orbital_mechanics.py` — Orbital platform.** Circular-orbit period/speed
+  (vis-viva), spherical-Earth central angle / elevation / slant range,
+  visibility, and overhead pass duration (deterministic bisection).
+* **`coupling.py` — EM coupling & shielding.** Skin depth, Schelkunoff
+  absorption + reflection shielding effectiveness, conductor effective height
+  and induced voltage, protection margin.
+* **`grid_resilience.py` — Power-network resilience.** Per-asset survival,
+  most-reliable path (Dijkstra on `-log` survival) and edge-disjoint path count
+  (Edmonds-Karp), resilience report.
 * **`dam_security.py` — Arkangel dam security.** Defense-in-depth access-control
   cascade (cumulative detection, expected response time, security score) and
-  breach-flood risk (Froehlich 1995 peak outflow; Ritter 1892 dam-break depth,
-  velocity, arrival time, flood-risk rating).
+  breach-flood risk (Froehlich 1995 peak outflow; Ritter 1892 dam-break).
+* **`breach_hydrograph.py` — Breach hydrograph.** Froehlich (2008) breach width,
+  volume-conserving triangular outflow hydrograph, downstream station table.
 
 ## Protocol integration
 

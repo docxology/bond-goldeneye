@@ -91,6 +91,13 @@ def generate_variables(
 
     per_class_radius = {row["name"]: row["radius_km"] for row in kill_table}
 
+    orbit = analysis["orbit"]
+    coupling = analysis["coupling"]
+    grid = analysis["grid"]
+    hydro = analysis["hydrograph"]
+    grid_per_load = {row["load"]: row for row in grid["per_load"]}
+    stations = hydro["stations"]
+
     if require_outputs and not kill_table:
         raise ValueError("ARKANGEL analysis produced no kill-radius rows — gate refused")
 
@@ -129,6 +136,40 @@ def generate_variables(
         "GE_ACCESS_EXPECTED_TIME_MIN": _fmt(access["expected_detection_time_min"]),
         "GE_SECURITY_SCORE": _fmt(access["security_score"]),
         "GE_NUM_LAYERS": str(access["num_layers"]),
+        # --- Orbital platform ---
+        "GE_ORBIT_PERIOD_MIN": _fmt(orbit["period_min"]),
+        "GE_ORBIT_SPEED_KMS": _fmt(orbit["speed_kms"]),
+        "GE_ORBIT_ELEVATION_DEG": _fmt(orbit["elevation_angle_deg"]),
+        "GE_ORBIT_SLANT_RANGE_KM": _fmt(orbit["slant_range_km"]),
+        "GE_ORBIT_CENTRAL_ANGLE_DEG": _fmt(orbit["central_angle_deg"]),
+        "GE_ORBIT_PASS_DURATION_MIN": _fmt(orbit["pass_duration_min"]),
+        # --- Coupling / shielding ---
+        "GE_COUPLING_FACILITY_FIELD_VM": _fmt(coupling["facility_field_vm"], 0),
+        "GE_COUPLING_EFFECTIVE_HEIGHT_M": _fmt(coupling["effective_height_m"]),
+        "GE_COUPLING_INDUCED_V": _fmt(coupling["induced_voltage_v"], 0),
+        "GE_COUPLING_SKIN_DEPTH_MM": _fmt(coupling["skin_depth_mm"], 3),
+        "GE_COUPLING_SE_DB": _fmt(coupling["se_db"]),
+        "GE_COUPLING_SHIELDED_FIELD_VM": _fmt(coupling["shielded_field_vm"], 2),
+        "GE_COUPLING_MARGIN_DB": _fmt(coupling["protection_margin_db_military"]),
+        "GE_COUPLING_CONDUCTED_A": _fmt(coupling["conducted_current_a"], 0),
+        # --- Regional grid resilience ---
+        "GE_GRID_NUM_NODES": str(grid["nodes"].__len__()),
+        "GE_GRID_NUM_LINES": str(grid["lines"].__len__()),
+        "GE_GRID_DOWN_NODES": ", ".join(grid["down_nodes"]),
+        "GE_GRID_EXPECTED_SERVED_MW": _fmt(grid["expected_served_mw"]),
+        "GE_GRID_TOTAL_CRITICAL_MW": _fmt(grid["total_critical_mw"]),
+        "GE_GRID_SERVED_FRACTION": _fmt(grid["served_fraction"] * 100.0),
+        "GE_GRID_MIN_RELIABILITY": _fmt(grid["min_reliability"], 3),
+        "GE_GRID_MIN_DISJOINT_PATHS": str(grid["min_disjoint_paths"]),
+        "GE_FACILITY_RELIABILITY": _fmt(grid_per_load["facility_sub"]["reliability"], 3),
+        "GE_FACILITY_DISJOINT_PATHS": str(grid_per_load["facility_sub"]["disjoint_paths"]),
+        # --- Breach hydrograph ---
+        "GE_BREACH_WIDTH_M": _fmt(hydro["breach_width_m"]),
+        "GE_HYDROGRAPH_DURATION_MIN": _fmt(hydro["duration_min"]),
+        "GE_MEAN_OUTFLOW_CMS": _fmt(hydro["mean_outflow_cms"], 0),
+        "GE_NUM_STATIONS": str(len(stations)),
+        "GE_FARTHEST_STATION_KM": _fmt(stations[-1]["distance_km"]),
+        "GE_FARTHEST_ARRIVAL_MIN": _fmt(stations[-1]["arrival_time_min"]),
         # --- Environment ---
         "PYTHON_VERSION": platform.python_version(),
         "NUMPY_VERSION": np.__version__,

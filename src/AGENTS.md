@@ -9,10 +9,14 @@ GoldenEye: ARKANGEL domain core and BOND protocol adapter.
 | `emp_model.py` | Orbital EMP threat envelope, geometry/horizon, waveform | pure core |
 | `kill_radius.py` | Electronics kill radii by vulnerability class | pure core |
 | `dam_security.py` | Arkangel access control + breach-flood risk | pure core |
+| `orbital_mechanics.py` | Orbital platform: Keplerian period/speed, pass geometry | pure core |
+| `coupling.py` | Skin depth, Schelkunoff SE, conductor coupling | pure core |
+| `grid_resilience.py` | Regional network resilience (reliability, redundancy) | pure core |
+| `breach_hydrograph.py` | Froehlich (2008) breach width + triangular hydrograph | pure core |
 | `scenario.py` | ARKANGEL composition, config loading, analysis, input hash | pure core |
 | `mission.py` | Frozen `bond_api.MissionProvider` adapter + gadget registry | protocol adapter |
 | `manuscript_variables.py` | `{{TOKEN}}` hydration from config + scenario | manuscript |
-| `figures/` | `emp_footprint.py`, `flood_wave.py` (deterministic PNGs) | figures |
+| `figures/` | `emp_footprint.py`, `flood_wave.py`, `grid_resilience.py` (deterministic PNGs) | figures |
 
 ## Layer contract
 

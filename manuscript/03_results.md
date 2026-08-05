@@ -54,3 +54,48 @@ The **{{GE_NUM_LAYERS}}** layered defense-in-depth cascade yields a
 **{{GE_ACCESS_DETECT_PROB}}** probability of detecting an intruder at least once,
 an expected response time of **{{GE_ACCESS_EXPECTED_TIME_MIN}}** min, and a
 composite security score of **{{GE_SECURITY_SCORE}}** (out of 100).
+
+## Orbital platform
+
+The weapon rides a circular orbit of radius 6,671 km with a period of
+**{{GE_ORBIT_PERIOD_MIN}}** min and speed **{{GE_ORBIT_SPEED_KMS}}** km/s. From the
+target, the platform stands at a **{{GE_ORBIT_ELEVATION_DEG}}**-degree elevation
+over a **{{GE_ORBIT_CENTRAL_ANGLE_DEG}}**-degree central angle
+(**{{GE_ORBIT_SLANT_RANGE_KM}}** km slant range) and remains above a
+**{{GE_ORBIT_PASS_DURATION_MIN}}**-minute usable pass — the detonation window.
+
+## Coupling and shielding
+
+At the facility the envelope field reaches **{{GE_COUPLING_FACILITY_FIELD_VM}}**
+V/m. A **{{GE_COUPLING_EFFECTIVE_HEIGHT_M}}** m effective antenna couples
+**{{GE_COUPLING_INDUCED_V}}** V (≈**{{GE_COUPLING_CONDUCTED_A}}** A into a 50 Ohm
+load) — a kilovolt-class conducted threat. In contrast, the skin depth at the
+representative E1 frequency is only **{{GE_COUPLING_SKIN_DEPTH_MM}}** mm in the
+shield material; a thin enclosure provides **{{GE_COUPLING_SE_DB}}** dB of
+shielding, reducing the penetrated field to **{{GE_COUPLING_SHIELDED_FIELD_VM}}**
+V/m and leaving a **{{GE_COUPLING_MARGIN_DB}}** dB protection margin against the
+military withstand level.
+
+## Regional power-network resilience
+
+![Regional grid resilience](output/figures/grid_resilience.png){#fig:grid_resilience width=100%}
+
+The **{{GE_GRID_NUM_NODES}}**-node, **{{GE_GRID_NUM_LINES}}**-line regional network
+loses the nodes **{{GE_GRID_DOWN_NODES}}** to certain failure. It serves an
+expected **{{GE_GRID_EXPECTED_SERVED_MW}}** MW of the
+**{{GE_GRID_TOTAL_CRITICAL_MW}}** MW critical load (**{{GE_GRID_SERVED_FRACTION}}**\\%),
+with a worst-case load reliability of **{{GE_GRID_MIN_RELIABILITY}}** and a
+minimum of **{{GE_GRID_MIN_DISJOINT_PATHS}}** redundant routes per critical load.
+The mission-critical facility keeps a **{{GE_FACILITY_RELIABILITY}}** survival
+probability over **{{GE_FACILITY_DISJOINT_PATHS}}** edge-disjoint paths — the
+hardened hydro source and a redundant interconnection are what keep it on the
+board.
+
+## Breach outflow hydrograph
+
+A breach **{{GE_BREACH_WIDTH_M}}** m wide releases the reservoir as a
+volume-conserving triangular hydrograph lasting **{{GE_HYDROGRAPH_DURATION_MIN}}**
+min at a mean outflow of **{{GE_MEAN_OUTFLOW_CMS}}** m^3/s. The flood sweeps all
+**{{GE_NUM_STATIONS}}** monitored stations; the farthest,
+**{{GE_FARTHEST_STATION_KM}}** km downstream, is reached in
+**{{GE_FARTHEST_ARRIVAL_MIN}}** min.

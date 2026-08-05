@@ -15,6 +15,13 @@ mission uses:
 | Facility downstream distance | **{{GE_FACILITY_DISTANCE_KM}}** km |
 | Access-control layers | **{{GE_NUM_LAYERS}}** |
 
+The orbital-platform geometry (the burst nadir at 60.0° N, 108.0° E and the
+target at 53.5° N), the coupling inputs (10 m conductor, 0.1 mm aluminium
+enclosure, 100 MHz reference frequency), the canonical 5-node regional grid,
+and the three downstream stations are declared in `manuscript/config.yaml`
+(the `orbit` and `coupling` blocks) and `src/goldeneye/scenario.py` (the grid
+and stations).
+
 The EMP envelope constants (reference amplitude **{{GE_NADIR_FIELD_VM}}** anchored
 to a 50 kV/m megaton-class reference, 0.3% prompt-gamma fraction, empirical
 yield exponent) are fixed in `src/goldeneye/emp_model.py`; the four

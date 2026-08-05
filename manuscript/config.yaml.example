@@ -41,6 +41,19 @@ scenario:
   weapon:
     yield_kt: 2000.0
     burst_altitude_km: 300.0
+  orbit:
+    altitude_km: 300.0
+    nadir_lat_deg: 60.0
+    nadir_lon_deg: 108.0
+    target_lat_deg: 53.5
+    target_lon_deg: 108.0
+    min_elevation_deg: 10.0
+  coupling:
+    conductor_length_m: 10.0
+    shield_material: "aluminum"
+    shield_thickness_mm: 0.1
+    e1_frequency_hz: 100000000.0
+    impedance_ohm: 50.0
   reservoir:
     name: "arkangel"
     volume_m3: 130000000.0

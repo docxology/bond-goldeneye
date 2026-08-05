@@ -86,11 +86,12 @@ def test_z_generate_manuscript_variables() -> None:
     assert (OUTPUT / "data" / "manuscript_variables.json").is_file()
     assert (OUTPUT / "figures" / "emp_footprint.png").is_file()
     assert (OUTPUT / "figures" / "flood_wave.png").is_file()
+    assert (OUTPUT / "figures" / "grid_resilience.png").is_file()
     assert (OUTPUT / "manuscript" / "00_abstract.md").is_file()
 
 
 def test_figures_are_pngs() -> None:
-    for name in ("emp_footprint.png", "flood_wave.png"):
+    for name in ("emp_footprint.png", "flood_wave.png", "grid_resilience.png"):
         path = OUTPUT / "figures" / name
         assert path.is_file()
         assert path.read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"

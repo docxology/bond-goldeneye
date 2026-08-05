@@ -17,15 +17,21 @@ deterministic domain core.
   horizon/line-of-sight, yield scaling, E1/E2/E3 normalized double-exponential waveform.
 - `src/goldeneye/kill_radius.py` — 4 vulnerability classes; kill radius by deterministic
   bisection; area, footprint fraction, damage-probability logistic.
-- `src/goldeneye/dam_security.py` — defense-in-depth access control
-  (`1−Π(1−p_i)`), expected detection time, security score; Froehlich (1995)
-  peak outflow `Q_p=0.607 V^0.295 H^1.24`; Ritter (1892) dam-break
-  `h=(1/9g)(2c0−x/t)²`, front speed `2c0`, arrival `x/2c0`, asymptote `4H/9`.
-- `src/goldeneye/scenario.py` — `ARKANGEL` defaults, config loading,
-  `analyze_arkangel` (deterministic dict), SHA-256 `input_hash`.
+- `src/goldeneye/orbital_mechanics.py` — Keplerian circular-orbit period/speed,
+  spherical-Earth central angle/elevation/slant range, visibility, overhead pass duration.
+- `src/goldeneye/coupling.py` — skin depth `sqrt(rho/(π f μ0 μr))`, Schelkunoff SE
+  (absorption + reflection), conductor effective height / induced voltage / protection margin.
+- `src/goldeneye/grid_resilience.py` — regional network per-asset survival, most-reliable
+  path (Dijkstra on `-log` survival), edge-disjoint path count (Edmonds-Karp), report.
+- `src/goldeneye/dam_security.py` — defense-in-depth access control (`1−Π(1−p_i)`),
+  expected detection time, security score; Froehlich (1995) peak outflow; Ritter (1892) dam-break.
+- `src/goldeneye/breach_hydrograph.py` — Froehlich (2008) breach width, volume-conserving
+  triangular hydrograph, downstream station table.
+- `src/goldeneye/scenario.py` — `ARKANGEL` defaults, config loading, `analyze_arkangel`
+  (deterministic dict), SHA-256 `input_hash`.
 - `src/goldeneye/mission.py` — the ONLY `bond_api` import; `MissionProvider`
-  (brief/recon/plan/execute/debrief) + `GadgetRegistry` under `goldeneye`.
-- `src/goldeneye/manuscript_variables.py`, `figures/` — tokens + concept figures.
+  (brief/recon/plan/execute/debrief) + `GadgetRegistry` under `goldeneye` (20 gadgets).
+- `src/goldeneye/manuscript_variables.py`, `figures/` — tokens + 3 concept figures.
 
 ## Quick reference
 

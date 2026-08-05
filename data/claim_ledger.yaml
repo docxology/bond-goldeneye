@@ -82,3 +82,52 @@ claims:
     source_tier: generated_metric
     freshness: active
     artifact_path: manuscript/03_results.md
+  - claim_id: orbit-period-arkangel
+    kind: number
+    value: 90.375
+    source: src/goldeneye/orbital_mechanics.py circular_orbit_period_s at 300 km (min)
+    source_tier: generated_metric
+    freshness: active
+    artifact_path: manuscript/03_results.md
+  - claim_id: coupling-induced-arkangel
+    kind: number
+    value: 34218.4
+    source: src/goldeneye/coupling.py induced_voltage_v at the facility field (V)
+    source_tier: generated_metric
+    freshness: active
+    artifact_path: manuscript/03_results.md
+  - claim_id: coupling-se-arkangel
+    kind: number
+    value: 269.8
+    source: src/goldeneye/coupling.py schelkunoff_se_db (0.1 mm aluminium @ 100 MHz, dB)
+    source_tier: generated_metric
+    freshness: active
+    artifact_path: manuscript/03_results.md
+  - claim_id: grid-served-fraction
+    kind: number
+    value: 0.284
+    source: src/goldeneye/grid_resilience.py resilience_report served_fraction (canonical grid)
+    source_tier: generated_metric
+    freshness: active
+    artifact_path: manuscript/03_results.md
+  - claim_id: grid-facility-reliability
+    kind: number
+    value: 0.402
+    source: src/goldeneye/grid_resilience.py most_reliable_path hydro->facility_sub reliability
+    source_tier: generated_metric
+    freshness: active
+    artifact_path: manuscript/03_results.md
+  - claim_id: breach-width-arkangel
+    kind: number
+    value: 177.4
+    source: src/goldeneye/breach_hydrograph.py breach_average_width_m (Froehlich 2008, m)
+    source_tier: generated_metric
+    freshness: active
+    artifact_path: manuscript/03_results.md
+  - claim_id: hydrograph-duration-arkangel
+    kind: number
+    value: 136.4
+    source: src/goldeneye/breach_hydrograph.py hydrograph_duration_s / 60 (min)
+    source_tier: generated_metric
+    freshness: active
+    artifact_path: manuscript/03_results.md

@@ -2,6 +2,28 @@
 
 Forward-only backlog for the GoldenEye: ARKANGEL BOND film package.
 
+## Deepened (phase 4)
+
+Four new pure-core modules (infrastructure-free) and their integration:
+
+- `src/goldeneye/orbital_mechanics.py` — Keplerian circular-orbit period/speed,
+  spherical-Earth central angle / elevation / slant range, visibility, and
+  overhead pass duration (deterministic bisection).
+- `src/goldeneye/coupling.py` — skin depth, Schelkunoff absorption+reflection
+  shielding effectiveness, conductor effective height / induced voltage /
+  protection margin.
+- `src/goldeneye/grid_resilience.py` — regional network per-asset survival,
+  most-reliable path (Dijkstra on `-log` survival), edge-disjoint path count
+  (Edmonds-Karp), resilience report.
+- `src/goldeneye/breach_hydrograph.py` — Froehlich (2008) breach width,
+  volume-conserving triangular outflow hydrograph, downstream station table.
+- `scenario.py::analyze_arkangel` now emits `orbit`, `coupling`, `grid`,
+  `hydrograph` sections; `mission.py` exposes 9 plan steps and 20 gadgets while
+  keeping the frozen `bond_api` surface unchanged; a third figure
+  (`grid_resilience.png`) renders the network analysis.
+
+See `docs/_generated/COUNTS.md` for live test count + coverage.
+
 ## Built (phase 2)
 
 - **Pure domain core** (infrastructure-free, importable without bond-api):

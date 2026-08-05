@@ -20,3 +20,18 @@ Vereines deutscher Ingenieure*, 36(33), 947–954.
 
 Stoker, J. J. (1957). *Water Waves: The Mathematical Theory with Applications*.
 Interscience Publishers, New York.
+
+Bate, R. R., Mueller, D. D., and White, J. E. (1971). *Fundamentals of
+Astrodynamics*. Dover Publications, New York.
+
+Ott, H. W. (2009). *Electromagnetic Compatibility Engineering*, 2nd ed.
+John Wiley & Sons, Hoboken, NJ.
+
+Vance, E. F. (1975). *Coupling to Shielded Cables*. Wiley-Interscience, New York.
+
+Froehlich, D. C. (2008). "Embankment dam breach parameters and their
+uncertainties." *Journal of Hydraulic Engineering*, 134(12), 1708–1721.
+
+Buldyrev, S. V., Parshani, R., Paul, G., Stanley, H. E., and Havlin, S. (2010).
+"Catastrophic cascade of failures in interdependent networks." *Nature*,
+464, 1025–1028.

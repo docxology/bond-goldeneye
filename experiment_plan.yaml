@@ -16,7 +16,10 @@ scenario:
 primary_metrics:
   - "nadir E1 field (V/m) and horizon footprint (km, km^2)"
   - "kill radius (km) and footprint fraction per vulnerability class"
-  - "breach peak discharge (m^3/s), flood arrival (min), inundation depth (m), risk rating"
+  - "orbital platform period (min), speed (km/s), pass duration (min), target elevation (deg)"
+  - "coupling: induced voltage (V), shielding effectiveness (dB), penetrated field (V/m), protection margin (dB)"
+  - "grid: down-set, expected served load (MW), served fraction, min reliability, min disjoint paths"
+  - "breach peak discharge (m^3/s), breach width (m), hydrograph duration (min), arrival (min), risk rating"
   - "defense-in-depth detection probability and composite security score"
 
 expected_figures:
@@ -26,14 +29,19 @@ expected_figures:
   - id: flood_wave
     file: output/figures/flood_wave.png
     description: "Ritter dam-break downstream profiles and facility inundation vs time"
+  - id: grid_resilience
+    file: output/figures/grid_resilience.png
+    description: "Regional network node survival map and per-critical-load reliability / redundancy"
 
 baseline:
   - "unprotected microelectronics destroyed over the whole visible footprint"
   - "legacy vacuum-tube electronics immune (kill radius 0 km)"
+  - "originally served 100% of critical load -> served fraction after strike"
 
 ablation:
   - "kill radius vs burst altitude (10-1000 km) for fixed yield"
   - "kill-radius fraction vs yield (3-3000 kt) at fixed altitude"
+  - "grid served load vs the set of certain failures (down-set removal)"
 
 determinism:
   seed: 0

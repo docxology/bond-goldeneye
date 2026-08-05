@@ -12,10 +12,14 @@ computation, never mocks.
 | `test_emp_model.py` | EMP geometry, envelope, waveform, registry |
 | `test_kill_radius.py` | kill radii, areas, sweeps, damage probability |
 | `test_dam_security.py` | access control, Froehlich, Ritter, flood risk |
-| `test_scenario.py` | ARKANGEL defaults, determinism, input hash, config |
-| `test_mission.py` | protocol conformance, gadgets, serialization, discovery, pure-core isolation |
+| `test_orbital_mechanics.py` | Keplerian kinematics, spherical geometry, pass duration |
+| `test_coupling.py` | skin depth, Schelkunoff SE, conductor coupling, materials |
+| `test_grid_resilience.py` | survival, most-reliable path, edge-disjoint count, report |
+| `test_breach_hydrograph.py` | Froehlich 2008 width, triangular hydrograph, stations |
+| `test_scenario.py` | ARKANGEL defaults, determinism, input hash, config (incl. orbit/coupling) |
+| `test_mission.py` | protocol conformance, gadgets (20), serialization, discovery, pure-core isolation |
 | `test_manuscript_variables.py` | token map + live cross-reference |
-| `test_figures.py` | in-process concept-figure rendering |
+| `test_figures.py` | in-process concept-figure rendering (3 figures) |
 | `test_scripts_smoke.py` | subprocess CLI smoke + artifact assertions |
 
 ## Contract

@@ -46,7 +46,20 @@ class TestAnalysis:
 
     def test_analysis_keys_present(self) -> None:
         a = analyze_arkangel(ARKANGEL)
-        assert set(a) == {"name", "codename", "input_hash", "emp", "kill_radius", "dam", "flood", "access"}
+        assert set(a) == {
+            "name",
+            "codename",
+            "input_hash",
+            "emp",
+            "kill_radius",
+            "orbit",
+            "coupling",
+            "grid",
+            "dam",
+            "flood",
+            "hydrograph",
+            "access",
+        }
 
     def test_analysis_json_serializable(self) -> None:
         import json
@@ -147,4 +160,65 @@ class TestConfigLoading:
         cfg = tmp_path / "config.yaml"
         cfg.write_text("scenario: [1, 2]\n", encoding="utf-8")
         with pytest.raises(ValueError, match="'scenario' section"):
+            load_scenario_config(cfg)
+
+
+class TestDeepenedAnalysis:
+    def test_new_sections_present(self) -> None:
+        a = analyze_arkangel(ARKANGEL)
+        assert set(a) >= {"orbit", "coupling", "grid", "hydrograph"}
+
+    def test_orbit_metrics(self) -> None:
+        orbit = analyze_arkangel(ARKANGEL)["orbit"]
+        assert orbit["period_min"] > 80.0
+        assert 7.0 < orbit["speed_kms"] < 8.0
+        assert orbit["visible"] is True
+        assert 0 < orbit["elevation_angle_deg"] < 90
+
+    def test_coupling_metrics(self) -> None:
+        c = analyze_arkangel(ARKANGEL)["coupling"]
+        assert c["induced_voltage_v"] > 10000.0
+        assert c["se_db"] > 200.0
+        assert c["shielded_field_vm"] < 1e-3
+        assert c["protection_margin_db_military"] > 10.0
+
+    def test_grid_metrics(self) -> None:
+        g = analyze_arkangel(ARKANGEL)["grid"]
+        assert g["down_nodes"] == ("town_a", "relay")
+        assert g["min_disjoint_paths"] >= 2
+        assert 0 < g["served_fraction"] < 1
+
+    def test_hydrograph_metrics(self) -> None:
+        h = analyze_arkangel(ARKANGEL)["hydrograph"]
+        assert h["breach_width_m"] > 100.0
+        assert len(h["stations"]) == 3
+        assert h["stations"][-1]["distance_km"] > h["stations"][0]["distance_km"]
+
+    def test_analysis_full_determinism(self) -> None:
+        assert analyze_arkangel(ARKANGEL) == analyze_arkangel(ARKANGEL)
+
+
+class TestConfigDeepened:
+    def test_orbit_coupling_override(self, tmp_path: Path) -> None:
+        cfg = tmp_path / "config.yaml"
+        cfg.write_text(
+            "scenario:\n"
+            "  orbit:\n"
+            "    altitude_km: 500.0\n"
+            "    min_elevation_deg: 20.0\n"
+            "  coupling:\n"
+            "    conductor_length_m: 25.0\n"
+            "    shield_material: copper\n",
+            encoding="utf-8",
+        )
+        sc = load_scenario_config(cfg)
+        assert sc.orbit.altitude_km == 500.0
+        assert sc.orbit.min_elevation_deg == 20.0
+        assert sc.coupling.conductor_length_m == 25.0
+        assert sc.coupling.shield_material == "copper"
+
+    def test_bad_coupling_material(self, tmp_path: Path) -> None:
+        cfg = tmp_path / "config.yaml"
+        cfg.write_text("scenario:\n  coupling:\n    shield_material: lead\n", encoding="utf-8")
+        with pytest.raises(KeyError):
             load_scenario_config(cfg)

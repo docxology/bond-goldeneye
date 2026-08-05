@@ -27,6 +27,7 @@ sys.path.insert(0, str(_PROJECT_ROOT / "src"))  # noqa: E402
 
 from goldeneye.figures.emp_footprint import plot_emp_footprint  # noqa: E402
 from goldeneye.figures.flood_wave import plot_flood_wave  # noqa: E402
+from goldeneye.figures.grid_resilience import plot_grid_resilience  # noqa: E402
 from goldeneye.manuscript_variables import (  # noqa: E402
     generate_variables,
     resolve_manuscript_tree,
@@ -51,11 +52,13 @@ def main() -> int:
     figures_dir = _PROJECT_ROOT / "output" / "figures"
     emp_path = plot_emp_footprint(figures_dir / "emp_footprint.png")
     flood_path = plot_flood_wave(figures_dir / "flood_wave.png")
+    grid_path = plot_grid_resilience(figures_dir / "grid_resilience.png")
 
     managed, resolved = resolve_manuscript_tree(variables)
     print(f"wrote {out_path}")
     print(f"wrote {emp_path}")
     print(f"wrote {flood_path}")
+    print(f"wrote {grid_path}")
     print(f"resolved {len(resolved)} manuscript sections into {managed}")
     return 0
 

@@ -158,3 +158,16 @@ class TestResolveTree:
             strict=False,
         )
         assert files == ["00_abstract.md"]
+
+
+def test_deepened_tokens_present_and_sensible() -> None:
+    v = generate_variables()
+    assert float(v["GE_ORBIT_PERIOD_MIN"]) > 80.0
+    assert 7.0 < float(v["GE_ORBIT_SPEED_KMS"]) < 8.0
+    assert float(v["GE_COUPLING_INDUCED_V"]) > 10000.0
+    assert float(v["GE_COUPLING_SE_DB"]) > 200.0
+    assert float(v["GE_GRID_SERVED_FRACTION"]) > 0.0
+    assert int(v["GE_GRID_MIN_DISJOINT_PATHS"]) >= 2
+    assert float(v["GE_BREACH_WIDTH_M"]) > 100.0
+    assert int(v["GE_NUM_STATIONS"]) == 3
+    assert float(v["GE_MEAN_OUTFLOW_CMS"]) > 0.0

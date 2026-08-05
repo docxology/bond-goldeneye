@@ -51,3 +51,13 @@ def test_figures_use_custom_scenario(tmp_path: Path) -> None:
 def test_figure_returns_same_path(tmp_path: Path) -> None:
     target = tmp_path / "target.png"
     assert plot_emp_footprint(target, ARKANGEL) == target
+
+
+def test_grid_resilience_renders(tmp_path: Path) -> None:
+    from goldeneye.figures.grid_resilience import plot_grid_resilience
+
+    out = plot_grid_resilience(tmp_path / "grid.png", ARKANGEL)
+    assert out.is_file()
+    data = out.read_bytes()
+    assert data[:8] == _PNG_MAGIC
+    assert len(data) > 10000
