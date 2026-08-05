@@ -1,7 +1,8 @@
 # Reproducibility
 
-Every numeric claim in this manuscript is produced from source by a
-regenerable pipeline; none is hand-authored.
+This is version **{{GE_VERSION}}** of **{{GE_TITLE}}**. Every numeric claim in
+this manuscript — result, model constant, and scenario input alike — is produced
+from source by a regenerable pipeline; none is hand-authored.
 
 ## Regeneration contract
 
@@ -10,8 +11,8 @@ regenerable pipeline; none is hand-authored.
    provenance-outcome record `output/data/arkangel_mission.json` written via
    `bond_utilities.mission_io.record_provenance_outcome`.
 2. `scripts/z_generate_manuscript_variables.py` writes
-   `output/data/manuscript_variables.json`, renders the two figures to
-   `output/figures/`, and resolves the numbered sections into
+   `output/data/manuscript_variables.json`, renders the three concept figures
+   to `output/figures/`, and resolves the numbered sections into
    `output/manuscript/`.
 3. `uv run pytest tests/ --cov=src --cov-fail-under=90` enforces the coverage
    gate; a live cross-reference test guarantees the token map and the
@@ -32,7 +33,8 @@ Regenerable artifacts under `output/` (git-ignored):
 
 - `data/arkangel_outcome.json`, `data/arkangel_mission.json`,
   `data/manuscript_variables.json`
-- `figures/emp_footprint.png`, `figures/flood_wave.png`
+- `figures/emp_footprint.png`, `figures/flood_wave.png`,
+  `figures/grid_resilience.png`
 - `manuscript/` (numbered sections with tokens resolved)
 
 Live test count and achieved coverage are tracked in

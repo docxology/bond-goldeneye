@@ -1,73 +1,64 @@
 # goldeneye TODO
 
-Forward-only backlog for the GoldenEye: ARKANGEL BOND film package.
+Remaining work for the **GoldenEye: ARKANGEL** BOND film package. This file
+tracks what is *still open*. Completed work is described in `README.md` (what
+the package does) and `docs/architecture.md` (how it is put together) — it is
+not re-listed here.
 
-## Deepened (phase 4)
+Live test count and coverage: `docs/_generated/COUNTS.md`. Never quote those
+figures in prose; cite the gate instead.
 
-Four new pure-core modules (infrastructure-free) and their integration:
+## Open — modelling
 
-- `src/goldeneye/orbital_mechanics.py` — Keplerian circular-orbit period/speed,
-  spherical-Earth central angle / elevation / slant range, visibility, and
-  overhead pass duration (deterministic bisection).
-- `src/goldeneye/coupling.py` — skin depth, Schelkunoff absorption+reflection
-  shielding effectiveness, conductor effective height / induced voltage /
-  protection margin.
-- `src/goldeneye/grid_resilience.py` — regional network per-asset survival,
-  most-reliable path (Dijkstra on `-log` survival), edge-disjoint path count
-  (Edmonds-Karp), resilience report.
-- `src/goldeneye/breach_hydrograph.py` — Froehlich (2008) breach width,
-  volume-conserving triangular outflow hydrograph, downstream station table.
-- `scenario.py::analyze_arkangel` now emits `orbit`, `coupling`, `grid`,
-  `hydrograph` sections; `mission.py` exposes 9 plan steps and 20 gadgets while
-  keeping the frozen `bond_api` surface unchanged; a third figure
-  (`grid_resilience.png`) renders the network analysis.
+- **Negative control for the kill-radius envelope.** Before any claim widens
+  beyond the documented conservative point-source regime, add a test that fails
+  when the envelope is used outside it. The current suite proves the model is
+  self-consistent, not that its regime of validity is respected.
+- **Grid independence assumption.** `resilience_report`'s expected served load
+  sums each critical load's best-path reliability, which assumes independent
+  asset failures. A correlated-failure variant (shared corridor, common-mode
+  field) would materially change the served fraction. Scoped but not started;
+  the limitation is disclosed in `07_scope_and_related_work.md`.
+- **Flood routing.** The downstream station table uses the frictionless
+  asymptotic peak depth `4H/9` and the Ritter front speed. A friction-aware
+  routing step would turn the arrival times from lower bounds into estimates.
+- **E2 amplitude fraction.** `E2_AMPLITUDE_FRACTION` is an engineering default,
+  not a standardized value (IEC 61000-2-9 specifies E1 most strictly). If a
+  sourced value is found, replace the constant and cite it.
 
-See `docs/_generated/COUNTS.md` for live test count + coverage.
+## Open — engineering
 
-## Built (phase 2)
+- **Non-zenith pass geometry.** `overhead_pass_duration_s` assumes a directly
+  overhead pass, so durations are upper bounds. A general ground-track pass
+  would need the platform's inclination and the target's offset from the track.
+- **Parallel-circuit reporting.** Parallel circuits now count correctly toward
+  redundancy and collapse to the most survivable circuit for path reliability.
+  The canonical grid has no parallel pair, so that path is exercised only by
+  tests — add one to the scenario if the grid is ever expanded.
 
-- **Pure domain core** (infrastructure-free, importable without bond-api):
-  - `src/goldeneye/emp_model.py` — orbital EMP threat envelope (detonation→ground
-    E1 field), geometry/horizon, yield scaling, E1/E2/E3 waveform.
-  - `src/goldeneye/kill_radius.py` — electronics kill radii by vulnerability
-    class (bisection), kill area, footprint fraction, damage probability.
-  - `src/goldeneye/dam_security.py` — Arkangel access control (defense in depth)
-    and breach-flood risk (Froehlich 1995; Ritter 1892 dam break).
-- **Scenario composition** — `src/goldeneye/scenario.py::ARKANGEL`, config
-  loading, `analyze_arkangel` (deterministic), canonical input hash.
-- **Protocol adapter** — `src/goldeneye/mission.py` implements the frozen
-  `bond_api.MissionProvider` (brief/recon/plan/execute/debrief) and registers 8
-  analytical gadgets with `bond_api.GadgetRegistry`.
-- **Manuscript + figures** — `src/goldeneye/manuscript_variables.py` (token
-  hydration), `src/goldeneye/figures/` (EMP footprint, flood wave);
-  `manuscript/` ARKANGEL sections + config + references.
-- **Thin CLIs** — `scripts/brief.py`, `recon.py`, `plan.py`, `execute.py`,
-  `debrief.py`, `z_generate_manuscript_variables.py`.
-- **Tests** — zero-mock, in-process figure tests, subprocess CLI smoke, and a
-  proof that the pure core imports without bond-api. See `docs/_generated/COUNTS.md`.
+## Deliberately not doing
 
-## Verification evidence
+- Chasing the last two uncovered branches. Both are defensive guards that are
+  unreachable through the public API given upstream invariants
+  (`SecurityLayer`'s probability range and `central_angle_deg`'s clamp). They
+  are commented at the call site and listed in `docs/architecture.md`, and the
+  invariants that make them unreachable are pinned by tests. Deleting them would
+  turn a future invariant change into a silent zero-divide.
+- Changing anything in the frozen `bond_api` MissionProvider surface. Depth goes
+  inside the package.
 
-- `uv run pytest tests/ --cov=src --cov-fail-under=90` (≥90% line+branch).
-- `uv run ruff check` / `ruff format --check` on `src/ scripts/ tests/`.
-- `uv run mypy src/ scripts/` clean.
-- Zero mocks in `tests/`; no `bond_api` import in the pure core.
-- Lineage: `rg template[_]code_project` → zero in the tree.
+## Integration points
 
-## Declared integration points
+- **Provenance persistence** — `scripts/execute.py` records outcomes via
+  `bond_utilities.mission_io.record_provenance_outcome`. If that helper is ever
+  unavailable, `analyze_arkangel` still returns `input_hash` plus the full
+  results for callers to persist themselves.
+- **Orchestrator discovery** — `src/goldeneye/mission.py` exposes
+  `MissionProvider` at module top level; bond-api discovers it by the slug
+  `goldeneye`. Acceptance: the orchestrator can `load_provider("goldeneye")` and
+  drive all five stages.
 
-- **Provenance persistence**: `scripts/execute.py` records outcomes via
-  `bond_utilities.mission_io.record_provenance_outcome` (bond-utilities, phase-1
-  done). If that helper is ever unavailable, `analyze_arkangel` still returns
-  the `input_hash` + full results for callers to persist themselves.
-- **Orchestrator discovery**: `src/goldeneye/mission.py` exposes `MissionProvider`
-  at module top level; bond-api (frozen) discovers it by slug `goldeneye`.
-  Accept: orchestrator can `load_provider("goldeneye")` and drive all five stages.
+## Housekeeping
 
-## Forward items
-
-- (Optional) dashboard / HTML report mirroring the analysis, if the generator
-  pattern in `src/` is extended.
-- Add a negative-control test before widening kill-radius claims beyond the
-  documented envelope regime (the conservative point-source assumption).
-- Refresh `docs/_generated/COUNTS.md` and figures after any public-surface change.
+- Refresh `docs/_generated/COUNTS.md` and re-render the three figures after any
+  change to the public surface or the scenario defaults.

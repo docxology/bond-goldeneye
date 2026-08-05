@@ -180,6 +180,9 @@ def expected_detection_time_min(layers: tuple[SecurityLayer, ...]) -> float:
         p_detect_any += p_first
         p_miss_before *= 1.0 - layer.detection_probability
     if p_detect_any <= 0.0:
+        # Defensive only: unreachable while SecurityLayer enforces
+        # detection_probability in (0, 1], so p_detect_any is always > 0.
+        # Retained so relaxing that invariant cannot introduce a zero divide.
         return sum(layer.response_time_min for layer in layers)
     return total / p_detect_any
 

@@ -142,6 +142,10 @@ def _elevation_from_central_angle_deg(gamma_deg: float, altitude_m: float) -> fl
     numerator = math.cos(gamma) - ratio
     denominator = math.sin(gamma)
     if denominator <= 0.0:
+        # Defensive only: unreachable via elevation_angle_deg, whose
+        # central_angle_deg clamps gamma to [0, 180] so sin(gamma) > 0 for every
+        # gamma the public path admits. Retained so a direct caller passing an
+        # out-of-range gamma cannot divide by zero.
         return 90.0
     return float(math.degrees(math.atan(numerator / denominator)))
 

@@ -67,19 +67,69 @@ manuscript-variable map, and three concept figures
 Scenario defaults live in `manuscript/config.yaml` and
 `src/goldeneye/scenario.py::ARKANGEL`; every manuscript token derives from them.
 
+## Modules
+
+Every module under `src/goldeneye/` and what it computes:
+
+| Module | One-line description |
+| --- | --- |
+| `emp_model.py` | Burst-to-ground E1 field envelope, geometry and horizon, yield scaling, atmospheric attenuation, and the normalized E1/E2/E3 double-exponential waveform. |
+| `orbital_mechanics.py` | Circular-orbit period and speed (vis-viva), great-circle central angle, platform elevation, slant range, visibility, and overhead pass duration. |
+| `kill_radius.py` | Four electronics vulnerability classes, per-class kill radius by deterministic bisection, kill area, footprint fraction, and a smooth damage-probability logistic. |
+| `coupling.py` | Skin depth, Schelkunoff absorption + reflection shielding effectiveness, conductor effective height, induced voltage, conducted current, and protection margin. |
+| `grid_resilience.py` | Per-asset survival from the local field, most-reliable source-to-load path (Dijkstra on `−log` survival), edge-disjoint path count (Edmonds-Karp), and the network resilience report. |
+| `dam_security.py` | Defense-in-depth access-control cascade (cumulative detection, expected response time, security score) and breach-flood risk (Froehlich 1995 peak outflow, Ritter 1892 dam break). |
+| `breach_hydrograph.py` | Froehlich (2008) breach width, volume-conserving triangular outflow hydrograph, and the downstream station inundation table. |
+| `scenario.py` | Composition layer: the canonical `ARKANGEL` scenario, `manuscript/config.yaml` overlay, the deterministic `analyze_arkangel()` result, and the canonical input hash. |
+| `manuscript_variables.py` | Hydrates every manuscript `{{TOKEN}}` from config + analysis, and resolves the section tree into `output/manuscript/`. |
+| `mission.py` | The only `bond_api` importer: the frozen `MissionProvider` adapter plus the `GADGETS` registry. |
+| `figures/emp_footprint.py` | Renders the EMP threat envelope and per-class kill radii. |
+| `figures/flood_wave.py` | Renders the Ritter dam-break flood wave. |
+| `figures/grid_resilience.py` | Renders the regional grid with per-asset survival. |
+
+## MissionProvider surface (frozen)
+
+`src/goldeneye/mission.py` exposes the BOND protocol contract that the CLI,
+coordinator and orchestrator consume. Its public shape is stable and must not
+change:
+
+| Member | Signature | Returns |
+| --- | --- | --- |
+| `MissionProvider.film` | attribute | `"goldeneye"` (the discovery slug) |
+| `brief` | `() -> MissionBrief` | 5 objectives, 2 assets, 3 constraints |
+| `recon` | `(ReconRequest) -> ReconReport` | 5 findings |
+| `plan` | `(MissionBrief) -> MissionPlan` | 9 ordered steps |
+| `execute` | `(MissionPlan) -> MissionOutcome` | full analysis + `Provenance` (seed 0, input hash) |
+| `debrief` | `(MissionOutcome) -> Debrief` | 6 lessons |
+| `GADGETS` | module-level `GadgetRegistry` | 20 callables registered under `goldeneye` |
+
+Discovery: `bond_api.discovery.load_provider("goldeneye")`.
+
 ## Layout
 
 ```
-src/goldeneye/        pure domain core: emp_model, kill_radius, dam_security,
-                      orbital_mechanics, coupling, grid_resilience, breach_hydrograph,
-                      scenario (composition)
-                      + manuscript_variables, figures/, mission.py (protocol adapter)
+src/goldeneye/        pure core (7 concept modules) + scenario composition,
+                      manuscript_variables, figures/, mission.py (protocol adapter)
 scripts/              thin orchestrators (brief/recon/plan/execute/debrief/z_generate)
-tests/                zero-mock suite, ≥90% line+branch coverage
+tests/                zero-mock suite; 90% line+branch floor enforced on src/
 manuscript/           ARKANGEL sections + config.yaml + references.bib
-docs/                 agent rules (read-first protocol)
+docs/                 agent rulebook (read-first protocol, architecture, testing)
 ```
 
-See `AGENTS.md` for the layer contract and `docs/agent_instructions.md` for the
+Verification gates — all four must pass before any change is done:
+
+```bash
+uv run pytest tests/ --cov=src --cov-fail-under=90
+uv run ruff check src/ scripts/ tests/
+uv run ruff format --check src/ scripts/ tests/
+uv run mypy src/ scripts/
+```
+
+Measured test count and coverage live in `docs/_generated/COUNTS.md` (generated
+from a real run) and are deliberately not quoted in this file, so it cannot go
+stale.
+
+See `AGENTS.md` for the layer contract, `docs/architecture.md` for the
+module-by-module architecture, and `docs/agent_instructions.md` for the
 read-first behavioral rules. This is a **local-only** working tree — there is no
 remote and it must never be pushed.

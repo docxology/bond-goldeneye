@@ -57,7 +57,8 @@ composite security score of **{{GE_SECURITY_SCORE}}** (out of 100).
 
 ## Orbital platform
 
-The weapon rides a circular orbit of radius 6,671 km with a period of
+The weapon rides a circular orbit of radius **{{GE_ORBIT_RADIUS_KM}}** km
+(**{{GE_ORBIT_ALTITUDE_KM}}** km altitude) with a period of
 **{{GE_ORBIT_PERIOD_MIN}}** min and speed **{{GE_ORBIT_SPEED_KMS}}** km/s. From the
 target, the platform stands at a **{{GE_ORBIT_ELEVATION_DEG}}**-degree elevation
 over a **{{GE_ORBIT_CENTRAL_ANGLE_DEG}}**-degree central angle
@@ -68,10 +69,14 @@ over a **{{GE_ORBIT_CENTRAL_ANGLE_DEG}}**-degree central angle
 
 At the facility the envelope field reaches **{{GE_COUPLING_FACILITY_FIELD_VM}}**
 V/m. A **{{GE_COUPLING_EFFECTIVE_HEIGHT_M}}** m effective antenna couples
-**{{GE_COUPLING_INDUCED_V}}** V (≈**{{GE_COUPLING_CONDUCTED_A}}** A into a 50 Ohm
-load) — a kilovolt-class conducted threat. In contrast, the skin depth at the
-representative E1 frequency is only **{{GE_COUPLING_SKIN_DEPTH_MM}}** mm in the
-shield material; a thin enclosure provides **{{GE_COUPLING_SE_DB}}** dB of
+**{{GE_COUPLING_INDUCED_V}}** V (≈**{{GE_COUPLING_CONDUCTED_A}}** A into a
+**{{GE_COUPLING_IMPEDANCE_OHM}}** Ohm load) — a kilovolt-class conducted threat.
+In contrast, the skin depth at the representative
+**{{GE_COUPLING_FREQUENCY_MHZ}}** MHz E1 frequency is only
+**{{GE_COUPLING_SKIN_DEPTH_MM}}** mm in the
+**{{GE_COUPLING_SHIELD_MATERIAL}}** shield; a
+**{{GE_COUPLING_SHIELD_THICKNESS_MM}}** mm enclosure provides
+**{{GE_COUPLING_SE_DB}}** dB of
 shielding, reducing the penetrated field to **{{GE_COUPLING_SHIELDED_FIELD_VM}}**
 V/m and leaving a **{{GE_COUPLING_MARGIN_DB}}** dB protection margin against the
 military withstand level.

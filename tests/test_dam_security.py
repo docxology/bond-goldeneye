@@ -206,3 +206,34 @@ class TestFloodRisk:
             severity_ratio(-1.0, 10.0)
         with pytest.raises(ValueError):
             severity_ratio(1.0, 0.0)
+
+
+class TestDegenerateEdgeCases:
+    """Boundary branches that the canonical scenario never reaches."""
+
+    def test_layer_invariant_forbids_a_blind_layer(self) -> None:
+        # SecurityLayer requires detection_probability in (0, 1], which is what
+        # makes the zero-detection fallback in expected_detection_time_min
+        # unreachable through the public API. Pin the invariant so that a future
+        # relaxation of it surfaces here rather than silently in the fallback.
+        with pytest.raises(ValueError, match=r"detection_probability must be in \(0, 1\]"):
+            SecurityLayer("blind", 0.0, 7.0, "unmanned")
+        assert all(0.0 < layer.detection_probability <= 1.0 for layer in DEFAULT_ACCESS_LAYERS)
+
+    def test_ritter_velocity_rejects_non_positive_time(self) -> None:
+        with pytest.raises(ValueError, match="t_s must be > 0"):
+            ritter_velocity_ms(100.0, 0.0, 75.0)
+
+    def test_ritter_velocity_zero_ahead_of_the_front(self) -> None:
+        # Far downstream of the front (x/t well beyond 2*c0) the water has not
+        # arrived, so the velocity is exactly zero.
+        c0 = ritter_celerity_ms(75.0)
+        assert ritter_velocity_ms(3.0 * c0 * 10.0, 10.0, 75.0) == 0.0
+
+    def test_ritter_velocity_zero_upstream_of_the_rarefaction(self) -> None:
+        c0 = ritter_celerity_ms(75.0)
+        assert ritter_velocity_ms(-2.0 * c0 * 10.0, 10.0, 75.0) == 0.0
+
+    def test_reservoir_name_must_be_non_empty(self) -> None:
+        with pytest.raises(ValueError, match="Reservoir.name must be non-empty"):
+            Reservoir(name="  ", volume_m3=1.0e8, head_m=75.0)

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import subprocess
 import sys
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -26,7 +27,7 @@ from bond_api.protocol import (
 )
 from bond_api.registry import GadgetRegistry
 from bond_api.serialization import from_json, to_json
-from goldeneye.mission import GADGETS, MissionProvider
+from goldeneye.mission import GADGETS, MissionProvider, _facility_reliability
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
@@ -257,3 +258,30 @@ class TestPureCoreDeepened:
         )
         assert proc.returncode == 0, proc.stderr
         assert "deep-core-ok" in proc.stdout
+
+
+class TestFacilityReliabilityFallback:
+    """The debrief's facility-reliability lookup must degrade honestly."""
+
+    def test_returns_facility_row_reliability(self) -> None:
+        provider = MissionProvider()
+        outcome = provider.execute(provider.plan(provider.brief()))
+        expected = next(
+            row["reliability"] for row in outcome.results["grid"]["per_load"] if row["load"] == "facility_sub"
+        )
+        assert _facility_reliability(outcome) == pytest.approx(expected)
+
+    def test_returns_zero_when_no_facility_load_is_present(self) -> None:
+        # A grid report with critical loads but no facility_sub row: the lookup
+        # falls through rather than raising, so the debrief still renders.
+        provider = MissionProvider()
+        outcome = provider.execute(provider.plan(provider.brief()))
+        stripped = dict(outcome.results)
+        stripped["grid"] = {"per_load": ({"load": "town_a", "reliability": 0.5},)}
+        assert _facility_reliability(replace(outcome, results=stripped)) == 0.0
+
+    def test_returns_zero_when_grid_section_is_absent(self) -> None:
+        provider = MissionProvider()
+        outcome = provider.execute(provider.plan(provider.brief()))
+        stripped = {k: v for k, v in outcome.results.items() if k != "grid"}
+        assert _facility_reliability(replace(outcome, results=stripped)) == 0.0

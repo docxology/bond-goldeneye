@@ -31,7 +31,7 @@ from goldeneye.dam_security import (
 )
 
 __all__ = [
-    "FROEHLICH_OVERTTOPING_FACTOR",
+    "FROEHLICH_OVERTOPPING_FACTOR",
     "FROEHLICH_PIPING_FACTOR",
     "Station",
     "breach_average_width_m",
@@ -43,7 +43,7 @@ __all__ = [
 ]
 
 #: Froehlich (2008) breach-width factors: overtopping vs piping failure.
-FROEHLICH_OVERTTOPING_FACTOR = 1.4
+FROEHLICH_OVERTOPPING_FACTOR = 1.4
 FROEHLICH_PIPING_FACTOR = 1.0
 
 
@@ -75,7 +75,7 @@ def breach_average_width_m(volume_m3: float, head_m: float, overtopping: bool = 
     ``B_avg = 0.27 * K0 * V^0.32 * H^0.04``."""
     if volume_m3 <= 0 or head_m <= 0:
         raise ValueError("volume_m3 and head_m must both be > 0")
-    k0 = FROEHLICH_OVERTTOPING_FACTOR if overtopping else FROEHLICH_PIPING_FACTOR
+    k0 = FROEHLICH_OVERTOPPING_FACTOR if overtopping else FROEHLICH_PIPING_FACTOR
     return float(0.27 * k0 * float(volume_m3) ** 0.32 * float(head_m) ** 0.04)
 
 

@@ -8,7 +8,8 @@ the coupled threat surfaces of *GoldenEye*'s ARKANGEL mission:
    E1/E2/E3 pulse), delivered by a Keplerian orbital platform with
    determinable pass geometry (**{{GE_ORBIT_PERIOD_MIN}}** min period,
    **{{GE_ORBIT_PASS_DURATION_MIN}}** min usable pass).
-2. **An electronics kill-radius analysis** across four defensible vulnerability
+2. **An electronics kill-radius analysis** across **{{GE_NUM_CLASSES}}**
+   defensible vulnerability
    classes, from unprotected microelectronics (destroyed over the whole visible
    footprint, **{{GE_RADIUS_UNPROTECTED_KM}}** km) to legacy vacuum-tube relays
    (immune, **{{GE_RADIUS_LEGACY_TUBE_KM}}** km).

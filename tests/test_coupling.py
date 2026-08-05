@@ -138,3 +138,27 @@ class TestMaterials:
     def test_unknown_material_raises(self) -> None:
         with pytest.raises(KeyError):
             lookup_material("lead")
+
+
+class TestGuardsActuallyFire:
+    """Every validation guard must be provably reachable, not decorative."""
+
+    def test_absorption_rejects_non_positive_skin_depth(self) -> None:
+        with pytest.raises(ValueError, match="skin_depth_m > 0"):
+            plane_wave_absorption_db(0.001, 0.0)
+
+    def test_absorption_rejects_negative_thickness(self) -> None:
+        with pytest.raises(ValueError, match="thickness_m >= 0"):
+            plane_wave_absorption_db(-1.0, 1e-6)
+
+    def test_reflection_rejects_non_positive_frequency(self) -> None:
+        with pytest.raises(ValueError, match="must all be > 0"):
+            plane_wave_reflection_db(0.0, 2.65e-8)
+
+    def test_reflection_rejects_non_positive_resistivity(self) -> None:
+        with pytest.raises(ValueError, match="must all be > 0"):
+            plane_wave_reflection_db(1.0e8, 0.0)
+
+    def test_induced_voltage_rejects_negative_effective_height(self) -> None:
+        with pytest.raises(ValueError, match="effective_height_m must be >= 0"):
+            induced_voltage_v(1000.0, -0.5)

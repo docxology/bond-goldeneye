@@ -184,3 +184,13 @@ class TestFieldConsistency:
         r = kill_radius_km(WEAPON, cls)
         field = peak_e_field_vm(r, WEAPON.burst_altitude_km, WEAPON.yield_kt)
         assert field >= cls.damage_threshold_vm - 1e-3
+
+
+class TestKillAreaFractionDegenerate:
+    def test_zero_burst_altitude_gives_zero_fraction(self) -> None:
+        # A zero-altitude burst has no horizon-limited footprint, so the
+        # covered fraction is defined as 0 rather than dividing by zero.
+        assert kill_area_fraction(10.0, 0.0) == 0.0
+
+    def test_fraction_is_clamped_to_one(self) -> None:
+        assert kill_area_fraction(1.0e9, 300.0) == 1.0

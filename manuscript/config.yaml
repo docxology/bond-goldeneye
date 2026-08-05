@@ -7,7 +7,7 @@
 paper:
   # RASP Standard: Title must be descriptive and objective.
   title: "GoldenEye: ARKANGEL — Special-Agent Mission Software"
-  subtitle: "Orbital EMP effects, electronics kill-radius analysis, and Arkangel dam-facility security"
+  subtitle: "Orbital EMP effects, electronics kill radius, EM coupling and shielding, power-network resilience, and Arkangel dam-facility security"
   version: "0.1.0"
   date: "2026-08-04"
 
@@ -29,9 +29,16 @@ keywords:
   - "high-altitude electromagnetic pulse (HEMP)"
   - "electronics kill radius"
   - "vulnerability classes"
+  - "orbital mechanics"
+  - "satellite pass geometry"
+  - "electromagnetic coupling"
+  - "shielding effectiveness"
+  - "power-network resilience"
+  - "infrastructure resilience"
   - "dam security"
-  - "breach flood risk"
   - "defense in depth"
+  - "breach flood risk"
+  - "dam-break hydrograph"
   - "reproducible research"
 
 metadata:

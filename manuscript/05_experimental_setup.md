@@ -15,17 +15,30 @@ mission uses:
 | Facility downstream distance | **{{GE_FACILITY_DISTANCE_KM}}** km |
 | Access-control layers | **{{GE_NUM_LAYERS}}** |
 
-The orbital-platform geometry (the burst nadir at 60.0° N, 108.0° E and the
-target at 53.5° N), the coupling inputs (10 m conductor, 0.1 mm aluminium
-enclosure, 100 MHz reference frequency), the canonical 5-node regional grid,
-and the three downstream stations are declared in `manuscript/config.yaml`
-(the `orbit` and `coupling` blocks) and `src/goldeneye/scenario.py` (the grid
-and stations).
+The orbital-platform geometry (burst nadir at
+**{{GE_ORBIT_NADIR_LAT_DEG}}**° N, **{{GE_ORBIT_NADIR_LON_DEG}}**° E; target at
+**{{GE_ORBIT_TARGET_LAT_DEG}}**° N; platform altitude
+**{{GE_ORBIT_ALTITUDE_KM}}** km; minimum usable elevation
+**{{GE_ORBIT_MIN_ELEVATION_DEG}}**°), the coupling inputs
+(**{{GE_COUPLING_CONDUCTOR_LENGTH_M}}** m conductor,
+**{{GE_COUPLING_SHIELD_THICKNESS_MM}}** mm **{{GE_COUPLING_SHIELD_MATERIAL}}**
+enclosure, **{{GE_COUPLING_FREQUENCY_MHZ}}** MHz reference frequency,
+**{{GE_COUPLING_IMPEDANCE_OHM}}** Ohm load), the canonical
+**{{GE_GRID_NUM_NODES}}**-node regional grid, and the
+**{{GE_NUM_STATIONS}}** downstream stations are declared in
+`manuscript/config.yaml` (the `orbit` and `coupling` blocks) and
+`src/goldeneye/scenario.py` (the grid and stations).
 
-The EMP envelope constants (reference amplitude **{{GE_NADIR_FIELD_VM}}** anchored
-to a 50 kV/m megaton-class reference, 0.3% prompt-gamma fraction, empirical
-yield exponent) are fixed in `src/goldeneye/emp_model.py`; the four
-vulnerability-class thresholds are fixed in `src/goldeneye/kill_radius.py`.
+The EMP envelope constants are fixed in `src/goldeneye/emp_model.py`: an
+amplitude anchor of **{{GE_E1_REFERENCE_VM}}** V/m at the
+**{{GE_REFERENCE_YIELD_KT}}** kt reference yield, a
+**{{GE_GAMMA_FRACTION_PCT}}**\% prompt-gamma fraction, and an empirical yield
+exponent of **{{GE_YIELD_EXPONENT}}**. (The **{{GE_NADIR_FIELD_VM}}** V/m nadir
+field reported in the results is *computed* from those constants at the
+scenario yield, not itself a constant.) The **{{GE_NUM_CLASSES}}**
+vulnerability-class thresholds are fixed in `src/goldeneye/kill_radius.py`,
+and the **{{GE_MILITARY_WITHSTAND_VM}}** V/m military withstand level used for
+the protection margin is declared in `src/goldeneye/scenario.py`.
 
 ## Software environment
 

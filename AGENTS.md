@@ -2,9 +2,9 @@
 
 **This is a BOND-suite film package**, mission codename **ARKANGEL** (GoldenEye,
 1995). It implements the frozen `bond_api.MissionProvider` protocol over a pure,
-deterministic domain core. Decision memory and verifier hardening follow
-`docs/rules/memory_and_decision_records.md`; live counts are generated (never
-hardcoded).
+deterministic domain core of seven concept modules. The agent rulebook lives in
+`docs/` — start at `docs/agent_instructions.md`. Live test counts and coverage
+are generated into `docs/_generated/COUNTS.md` and never hardcoded in prose.
 
 ## Layer contract
 
@@ -16,8 +16,10 @@ hardcoded).
 | `scripts/` | Thin orchestrators (one per mission phase); no business logic. |
 | Live counts | `docs/_generated/COUNTS.md`; never hardcode test totals or coverage %. |
 
-Enforced by `scripts/layer-contract` checks in the test suite (zero-mock audit,
-pure-core-without-bond-api subprocess test).
+The layer contract is enforced by the test suite itself, not by a separate
+script: `tests/test_mission.py::TestPureCoreWithoutBondApi` spawns a subprocess
+with `bond_api`/`bond_utilities` removed and imports the pure core, and the
+zero-mock audit below is a one-line grep over `tests/`.
 
 ## Concept payload (the deep core)
 

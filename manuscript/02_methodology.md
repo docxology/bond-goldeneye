@@ -10,13 +10,16 @@ E1 peak field as a documented conservative point-source envelope:
 $$E(r) = E_0 \, Y_s \, \left(\frac{h}{d}\right)^2 \exp\!\left(-\frac{d-h}{\lambda(h)}\right),$$
 
 where $h$ is the burst altitude, $d = \sqrt{h^2 + r^2}$ the slant range to a
-ground point at horizontal range $r$, $Y_s = (Y/Y_\text{ref})^{0.85}$ the
+ground point at horizontal range $r$, $Y_s = (Y/Y_\text{ref})^{p}$ the
 empirical yield scaling, and $\lambda(h)$ the effective gamma attenuation
 length, which grows exponentially with altitude (thinner air). Reflecting the
 finiteness of the deposition region, the amplitude anchor is
-$E_0 = 50000$ V/m at a megaton-class reference yield, matching the canonical
-HEMP figure; the prompt-gamma fraction is fixed at 0.3% (Glasstone and Dolan,
-1977). Beyond line of sight the field is taken as zero, which bounds the
+$E_0 =$ **{{GE_E1_REFERENCE_VM}}** V/m at the
+**{{GE_REFERENCE_YIELD_KT}}** kt reference yield, matching the canonical
+HEMP figure; the prompt-gamma fraction is fixed at
+**{{GE_GAMMA_FRACTION_PCT}}**\% (Glasstone and Dolan,
+1977) and the empirical yield exponent at **{{GE_YIELD_EXPONENT}}**.
+Beyond line of sight the field is taken as zero, which bounds the
 illuminated footprint to the geometric horizon
 $\sqrt{2 R_\oplus h + h^2}$.
 
@@ -28,10 +31,12 @@ E1) and amplitude policies.
 
 ## Electronics kill-radius analysis (`src/goldeneye/kill_radius.py`)
 
-Four vulnerability classes are defined by increasing damage thresholds:
-*unprotected* microelectronics (~1 kV/m), *commercial*/semi-hardened
-(~10 kV/m), *MIL-STD-188-125*-hardened facilities (50 kV/m), and *legacy
-vacuum-tube*/relay electronics (~1 MV/m). Because the E1 envelope is monotone
+**{{GE_NUM_CLASSES}}** vulnerability classes are defined by increasing damage
+thresholds: *unprotected* microelectronics
+(**{{GE_THRESHOLD_UNPROTECTED_VM}}** V/m), *commercial*/semi-hardened
+(**{{GE_THRESHOLD_COMMERCIAL_VM}}** V/m), *MIL-STD-188-125*-hardened facilities
+(**{{GE_THRESHOLD_MILITARY_VM}}** V/m), and *legacy vacuum-tube*/relay
+electronics (**{{GE_THRESHOLD_LEGACY_TUBE_VM}}** V/m). Because the E1 envelope is monotone
 decreasing in range, the kill radius — the range at which the field meets the
 class threshold — is found by deterministic bisection. The enclosed kill area
 is $\pi r^2$, and the fraction of the illuminated footprint covered is
@@ -79,10 +84,11 @@ arc fraction of the orbit bounds the usable pass duration.
 
 To reach electronics the field must couple onto conductors and penetrate
 enclosures. Skin depth follows the classical $\delta = \sqrt{\rho/(\pi f \mu_0 \mu_r)}$.
-Schelkunoff shielding effectiveness combines plane-wave absorption
+Schelkunoff (1943) shielding effectiveness combines plane-wave absorption
 $A = 8.686\,t/\delta$ dB with reflection $R = 168 - 10\log_{10}(\mu_r f/\sigma)$ dB
-(Ott, *Electromagnetic Compatibility Engineering*, 2009; the multiple-reflection
-correction is neglected for thick shields). An exposed conductor of length $L$
+(Schelkunoff, 1943; constants as tabulated by Ott, *Electromagnetic
+Compatibility Engineering*, 2009; the multiple-reflection correction is
+neglected for thick shields). An exposed conductor of length $L$
 at field-elevation $\varepsilon$ has effective height $h_\mathrm{eff} =
 L\sin\varepsilon$, coupling an induced voltage $V = E\,h_\mathrm{eff}$, and a
 protection margin $20\log_{10}(\text{withstand}/E)$ dB quantifies residual
@@ -96,8 +102,10 @@ asset carries a vulnerability class; its survival probability is
 $1-P_\mathrm{damage}(E)$ at the asset's envelope field. The most-reliable
 source-to-load route maximises the product of survival probabilities
 (equivalent to shortest paths under $-\log(\text{survival})$ weights,
-deterministic Dijkstra with insertion-order tie-breaking); redundancy is the
-number of edge-disjoint routes via Edmonds-Karp max flow with unit capacities.
+deterministic Dijkstra (1959) with insertion-order tie-breaking); redundancy is
+the number of edge-disjoint routes via Edmonds-Karp (1972) max flow with unit
+capacities, where parallel circuits between one node pair each contribute their
+own unit of capacity.
 The report's expected served load assumes independence of the surviving
 assets along each best path (a documented approximation).
 

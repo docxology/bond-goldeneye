@@ -277,14 +277,12 @@ def component_amplitude_vm(
     * E2 -> a fixed fraction of the local E1 peak.
     * E3 -> a weakly yield-scaled late-time amplitude (MHD mechanism).
     """
-    if component == "E1":
+    name = _component(component).name  # raises ValueError for unknown names
+    if name == "E1":
         return e1_peak_vm
-    if component == "E2":
+    if name == "E2":
         return E2_AMPLITUDE_FRACTION * e1_peak_vm
-    if component == "E3":
-        return float(E3_REFERENCE_VM * (float(yield_kt) / REFERENCE_YIELD_KT) ** E3_YIELD_EXPONENT)
-    _component(component)  # raises for unknown names
-    raise AssertionError("unreachable")
+    return float(E3_REFERENCE_VM * (float(yield_kt) / REFERENCE_YIELD_KT) ** E3_YIELD_EXPONENT)
 
 
 def hemp_waveform(t_s: float, component: str, peak_vm: float) -> float:

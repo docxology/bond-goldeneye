@@ -7,11 +7,11 @@ a hard constraint for agents working in this package.
 
 | File | Purpose |
 | --- | --- |
-| `README.md` | Navigation + entry points |
+| `README.md` | Navigation, per-file summary, entry points |
 | `AGENTS.md` | This index |
-| `agent_instructions.md` | Read-first behavioral rules (scope, purity, mocks, determinism, tokens, gates) |
-| `architecture.md` | Layer boundaries, dependency rules, forbidden patterns |
-| `testing_philosophy.md` | Zero-mock policy, coverage mechanics, test-file inventory |
+| `agent_instructions.md` | Read-first behavioral rules (scope, purity, thin orchestrators, mocks, determinism, tokens, frozen protocol, gates) |
+| `architecture.md` | Layer topology, the seven pure-core modules and what each computes, the row-by-row frozen MissionProvider contract, dependency rules, forbidden patterns |
+| `testing_philosophy.md` | Zero-mock policy, determinism guarantees, falsifiable-gate convention, per-file test inventory |
 | `_generated/COUNTS.md` | Live test count + measured coverage (generated, not hand-edited) |
 
 ## Read-first protocol

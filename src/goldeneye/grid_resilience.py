@@ -13,7 +13,9 @@ envelope from :mod:`goldeneye.emp_model`. It combines:
   survival probabilities along a source-to-load route (equivalently minimising
   the sum of ``-log(survival)``), with insertion-order tie-breaking.
 * **Path redundancy** — the number of edge-disjoint source-to-load routes via
-  Edmonds-Karp max flow with unit edge capacities (deterministic BFS).
+  Edmonds-Karp max flow with unit edge capacities (deterministic BFS). Parallel
+  circuits between one node pair each contribute their own unit of capacity, so
+  they count as separate routes.
 * **Resilience report** — per critical load: best-path reliability and
   disjoint-path count; network-level expected served load (the sum of
   ``load * P(best path survives)``, a documented approximation assuming
@@ -44,6 +46,7 @@ __all__ = [
     "line_between",
     "line_field_vm",
     "line_survival_probability",
+    "lines_between",
     "most_reliable_path",
     "node_field_vm",
     "node_survival_probability",
@@ -143,12 +146,26 @@ def node_field_vm(grid: PowerGrid, weapon: EmpWeapon, node_name: str) -> float:
     return peak_e_field_vm(range_km, weapon.burst_altitude_km, weapon.yield_kt)
 
 
+def lines_between(grid: PowerGrid, node_a: str, node_b: str) -> tuple[GridLine, ...]:
+    """Every line directly connecting ``node_a`` and ``node_b``, in insertion order.
+
+    A node pair may carry more than one line (parallel circuits are ordinary
+    transmission redundancy), so callers that reason about connectivity must
+    consider all of them rather than only the first.
+    """
+    found = tuple(line for line in grid.lines if {line.node_a, line.node_b} == {node_a, node_b})
+    if not found:
+        raise KeyError(f"no grid line connects {node_a!r} and {node_b!r}")
+    return found
+
+
 def line_between(grid: PowerGrid, node_a: str, node_b: str) -> GridLine:
-    """The line directly connecting ``node_a`` and ``node_b`` (or KeyError)."""
-    for line in grid.lines:
-        if {line.node_a, line.node_b} == {node_a, node_b}:
-            return line
-    raise KeyError(f"no grid line connects {node_a!r} and {node_b!r}")
+    """The first line directly connecting ``node_a`` and ``node_b`` (or KeyError).
+
+    With parallel circuits this returns only the first in insertion order; use
+    :func:`lines_between` when every parallel circuit matters.
+    """
+    return lines_between(grid, node_a, node_b)[0]
 
 
 def line_field_vm(grid: PowerGrid, weapon: EmpWeapon, line_name: str) -> float:
@@ -196,14 +213,18 @@ def certainly_failed_nodes(grid: PowerGrid, weapon: EmpWeapon) -> tuple[str, ...
 
 def path_reliability(grid: PowerGrid, weapon: EmpWeapon, path: tuple[str, ...]) -> float:
     """Survival probability of a node path: the product of every node's and
-    every traversed line's survival probability (independence assumption)."""
+    every traversed hop's survival probability (independence assumption).
+
+    Where a hop is served by parallel circuits the most survivable one is used,
+    matching the edge relaxation in :func:`most_reliable_path`.
+    """
     if not path:
         raise ValueError("path must contain at least one node")
     reliability = 1.0
     for name in path:
         reliability *= node_survival_probability(grid, weapon, name)
     for a, b in zip(path, path[1:]):
-        reliability *= line_survival_probability(grid, weapon, line_between(grid, a, b).name)
+        reliability *= max(line_survival_probability(grid, weapon, line.name) for line in lines_between(grid, a, b))
     return float(reliability)
 
 
@@ -234,13 +255,10 @@ def most_reliable_path(
     visited: set[str] = set()
 
     while len(visited) < len(order):
-        # Pick the unvisited node with the smallest distance (insertion-order tie).
-        current: str | None = None
-        for name in order:
-            if name not in visited and (current is None or dist[name] < dist[current]):
-                current = name
-        if current is None:
-            break
+        # Pick the unvisited node with the smallest distance. The while
+        # condition guarantees this list is non-empty, and ``min`` returns the
+        # first minimal element, so ties break by grid insertion order.
+        current = min((name for name in order if name not in visited), key=lambda name: dist[name])
         if current == target or math.isinf(dist[current]):
             break
         visited.add(current)
@@ -275,14 +293,19 @@ def most_reliable_path(
 
 def edge_disjoint_path_count(grid: PowerGrid, source: str, target: str) -> int:
     """Number of edge-disjoint source-to-target paths (Edmonds-Karp max flow
-    with unit edge capacities). Deterministic BFS in insertion order."""
+    with unit edge capacities). Deterministic BFS in insertion order.
+
+    Each line contributes one unit of capacity, so parallel circuits between
+    the same node pair each count as a separate disjoint route.
+    """
     if source == target:
         return 0
     order = tuple(node.name for node in grid.nodes)
     residual: dict[str, dict[str, int]] = {name: {} for name in order}
     for line in grid.lines:
-        residual[line.node_a][line.node_b] = 1
-        residual[line.node_b][line.node_a] = 1
+        # Accumulate, never overwrite: parallel circuits add capacity.
+        residual[line.node_a][line.node_b] = residual[line.node_a].get(line.node_b, 0) + 1
+        residual[line.node_b][line.node_a] = residual[line.node_b].get(line.node_a, 0) + 1
 
     flow = 0
     while True:
@@ -308,7 +331,7 @@ def edge_disjoint_path_count(grid: PowerGrid, source: str, target: str) -> int:
             p = parent[v]
             assert p is not None and p != v
             residual[p][v] -= 1
-            residual[v][p] = residual.get(v, {}).get(p, 0) + 1
+            residual[v][p] = residual[v].get(p, 0) + 1
             v = p
 
 

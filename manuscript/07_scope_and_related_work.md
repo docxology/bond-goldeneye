@@ -2,8 +2,11 @@
 
 ## Scope
 
-This package models three specific systems from *GoldenEye* (1995) with
-closed-form, deterministic approximations. It is engineering mission software,
+This package models the coupled threat surfaces of *GoldenEye* (1995) — the
+orbital weapon and its platform, electronics vulnerability, EM coupling and
+shielding, regional power-network resilience, and the Arkangel dam facility's
+access control and breach flood — with closed-form, deterministic
+approximations across seven pure-core modules. It is engineering mission software,
 not a predictive defence-physics code, and its honesty about assumptions is
 part of the deliverable.
 
@@ -17,7 +20,8 @@ rate constants; E2 is not standardized (IEC defines E1 most strictly) and its
 amplitude fraction is an engineering default.
 
 **Kill radius.** Vulnerability-class thresholds are engineering references
-from the EMP-hardening literature (e.g. MIL-STD-188-125 for the 50 kV/m E1
+from the EMP-hardening literature (e.g. MIL-STD-188-125 for the
+**{{GE_THRESHOLD_MILITARY_VM}}** V/m E1
 hardness level), not guarantees for specific equipment under specific coupling
 conditions. Damage probability is a smooth surrogate, not a validated
 reliability model.
@@ -45,7 +49,10 @@ are open-circuit estimates, not load- and joint-dependent.
 **Grid resilience.** Survival probabilities assume independent asset failures
 from the local envelope field; the expected served load is the sum of each
 critical load's best-path reliability (an independence approximation, not a
-full stochastic cascade). The canonical 5-node network is a scenario dataset,
+full stochastic cascade). Parallel circuits between the same node pair are
+counted individually for redundancy and collapsed to the most survivable
+circuit for path reliability. The canonical
+**{{GE_GRID_NUM_NODES}}**-node network is a scenario dataset,
 not the real Severnaya grid.
 
 ## Related work
@@ -59,9 +66,11 @@ Compatibility Engineering* (2009) and Vance's *Coupling to Shielded Cables*
 (1975). Peak dam-breach outflow is regressed by Froehlich (1995) and breach
 geometry by Froehlich (2008); the classical instantaneous dam-break solution
 originates with Ritter (1892) and is presented textually in Stoker's *Water
-Waves* (1957). Network-resilience reasoning draws on the deterministic
-reliability and max-flow literature, and on the cascade-failure framing of
-Buldyrev et al. (2010). Defense-in-depth detection probability is the
+Waves* (1957). The shielding-effectiveness formulation is Schelkunoff's (1943).
+The two graph algorithms are used in their original forms: shortest paths after
+Dijkstra (1959), applied here to `−log` survival weights, and edge-disjoint path
+counting by max flow after Edmonds and Karp (1972). Network-resilience reasoning
+additionally draws on the cascade-failure framing of Buldyrev et al. (2010). Defense-in-depth detection probability is the
 standard layered-reliability formula. The BOND protocol itself is specified in
 the frozen `bond-api` package; this package is one of many films implementing
 that contract.

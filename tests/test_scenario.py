@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 from goldeneye.scenario import (
+    CouplingParams,
     ARKANGEL,
     ArkangelScenario,
     analyze_arkangel,
@@ -222,3 +223,75 @@ class TestConfigDeepened:
         cfg.write_text("scenario:\n  coupling:\n    shield_material: lead\n", encoding="utf-8")
         with pytest.raises(KeyError):
             load_scenario_config(cfg)
+
+
+class TestCouplingParamsGuards:
+    """CouplingParams rejects every physically meaningless input."""
+
+    def _params(self, **overrides: object) -> None:
+        kwargs: dict[str, object] = {
+            "conductor_length_m": 10.0,
+            "shield_material": "aluminum",
+            "shield_thickness_mm": 0.1,
+            "e1_frequency_hz": 1.0e8,
+            "impedance_ohm": 50.0,
+        }
+        kwargs.update(overrides)
+        CouplingParams(**kwargs)  # type: ignore[arg-type]
+
+    def test_rejects_non_positive_conductor_length(self) -> None:
+        with pytest.raises(ValueError, match="conductor_length_m must be > 0"):
+            self._params(conductor_length_m=0.0)
+
+    def test_rejects_unknown_shield_material(self) -> None:
+        with pytest.raises(KeyError, match="unknown shield material"):
+            self._params(shield_material="unobtainium")
+
+    def test_rejects_non_positive_thickness(self) -> None:
+        with pytest.raises(ValueError, match="shield_thickness_mm must be > 0"):
+            self._params(shield_thickness_mm=-1.0)
+
+    def test_rejects_non_positive_frequency(self) -> None:
+        with pytest.raises(ValueError, match="e1_frequency_hz must be > 0"):
+            self._params(e1_frequency_hz=0.0)
+
+    def test_rejects_non_positive_impedance(self) -> None:
+        with pytest.raises(ValueError, match="impedance_ohm must be > 0"):
+            self._params(impedance_ohm=0.0)
+
+    def test_scenario_rejects_non_positive_facility_elevation(self) -> None:
+        with pytest.raises(ValueError, match="facility_elevation_m must be > 0"):
+            ArkangelScenario(
+                weapon=EmpWeapon(yield_kt=2000.0, burst_altitude_km=300.0),
+                reservoir=Reservoir(name="r", volume_m3=1.0e8, head_m=75.0),
+                facility_distance_km=8.0,
+                facility_elevation_m=0.0,
+            )
+
+    def test_config_access_layer_must_be_a_mapping(self, tmp_path) -> None:  # type: ignore[no-untyped-def]
+        config = tmp_path / "config.yaml"
+        config.write_text(
+            "scenario:\n  access:\n    layers:\n      - not_a_mapping\n",
+            encoding="utf-8",
+        )
+        with pytest.raises(ValueError, match="each access layer must be a mapping"):
+            load_scenario_config(config)
+
+
+class TestOrbitAndCouplingSectionKeys:
+    """Keys added for manuscript tokens must stay present and correct."""
+
+    def test_orbit_section_reports_radius_and_inputs(self) -> None:
+        orbit = analyze_arkangel(ARKANGEL)["orbit"]
+        assert orbit["radius_km"] == pytest.approx(6371.0 + ARKANGEL.orbit.altitude_km)
+        assert orbit["min_elevation_deg"] == ARKANGEL.orbit.min_elevation_deg
+        assert orbit["nadir_lat_deg"] == ARKANGEL.orbit.nadir_lat_deg
+        assert orbit["target_lat_deg"] == ARKANGEL.orbit.target_lat_deg
+
+    def test_coupling_section_echoes_its_inputs(self) -> None:
+        coupling = analyze_arkangel(ARKANGEL)["coupling"]
+        assert coupling["conductor_length_m"] == ARKANGEL.coupling.conductor_length_m
+        assert coupling["shield_material"] == ARKANGEL.coupling.shield_material
+        assert coupling["frequency_mhz"] == pytest.approx(ARKANGEL.coupling.e1_frequency_hz / 1e6)
+        assert coupling["impedance_ohm"] == ARKANGEL.coupling.impedance_ohm
+        assert coupling["military_withstand_vm"] > 0.0

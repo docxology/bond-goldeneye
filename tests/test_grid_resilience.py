@@ -11,7 +11,10 @@ from goldeneye.grid_resilience import (
     PowerGrid,
     certainly_failed_nodes,
     edge_disjoint_path_count,
+    line_between,
+    line_field_vm,
     line_survival_probability,
+    lines_between,
     most_reliable_path,
     node_survival_probability,
     path_reliability,
@@ -188,7 +191,94 @@ class TestPaths:
         assert rel == 0.0
 
 
+class TestParallelCircuits:
+    """Parallel circuits between one node pair are ordinary transmission
+    redundancy; each must count as its own edge-disjoint route."""
+
+    def _parallel(self, second_class: str = "military") -> PowerGrid:
+        return PowerGrid(
+            (_military("A", 0.0, 850.0), _military("B", 100.0, 850.0, critical=True, load=10.0)),
+            (
+                GridLine("AB_1", "A", "B", "military"),
+                GridLine("AB_2", "A", "B", second_class),
+            ),
+            source="A",
+        )
+
+    def test_two_parallel_circuits_count_as_two_routes(self) -> None:
+        # Regression: capacities were overwritten, collapsing both circuits to one.
+        assert edge_disjoint_path_count(self._parallel(), "A", "B") == 2
+
+    def test_three_parallel_circuits_count_as_three(self) -> None:
+        grid = PowerGrid(
+            (_military("A", 0.0, 850.0), _military("B", 100.0, 850.0)),
+            tuple(GridLine(f"AB_{i}", "A", "B", "military") for i in range(3)),
+            source="A",
+        )
+        assert edge_disjoint_path_count(grid, "A", "B") == 3
+
+    def test_lines_between_returns_every_circuit(self) -> None:
+        grid = self._parallel()
+        names = [line.name for line in lines_between(grid, "A", "B")]
+        assert names == ["AB_1", "AB_2"]
+        # line_between keeps its documented first-match behaviour.
+        assert line_between(grid, "A", "B").name == "AB_1"
+
+    def test_lines_between_unknown_pair_raises(self) -> None:
+        grid = self._parallel()
+        with pytest.raises(KeyError):
+            lines_between(grid, "A", "Z")
+
+    def test_path_reliability_uses_most_survivable_circuit(self) -> None:
+        # A hardened circuit in parallel with a fragile one must not be dragged
+        # down by the fragile one: Dijkstra relaxes on the best edge, so
+        # path_reliability must agree with it.
+        grid = self._parallel(second_class="unprotected")
+        hardened = line_survival_probability(grid, WEAPON, "AB_1")
+        fragile = line_survival_probability(grid, WEAPON, "AB_2")
+        assert hardened > fragile  # the test is only meaningful if they differ
+        path, rel = most_reliable_path(grid, WEAPON, "A", "B")
+        assert path == ("A", "B")
+        assert path_reliability(grid, WEAPON, path) == pytest.approx(rel)
+        expected = (
+            node_survival_probability(grid, WEAPON, "A") * node_survival_probability(grid, WEAPON, "B") * hardened
+        )
+        assert path_reliability(grid, WEAPON, path) == pytest.approx(expected)
+
+
 class TestResilienceReport:
+    def test_source_node_that_is_itself_critical(self) -> None:
+        # The canonical grid's source is not a critical load, so this branch is
+        # otherwise unexercised: a critical source is served with certainty and
+        # needs no route to itself.
+        grid = PowerGrid(
+            (
+                _military("A", 0.0, 850.0, critical=True, load=25.0),
+                _military("B", 100.0, 850.0, critical=True, load=5.0),
+            ),
+            (GridLine("AB", "A", "B", "military"),),
+            source="A",
+        )
+        report = resilience_report(grid, WEAPON)
+        source_row = next(row for row in report["per_load"] if row["load"] == "A")
+        assert source_row["reliability"] == 1.0
+        assert source_row["disjoint_paths"] == 0
+        assert source_row["path"] == ("A",)
+        assert report["total_critical_mw"] == pytest.approx(30.0)
+
+    def test_report_with_no_critical_loads_is_zeroed_not_undefined(self) -> None:
+        grid = PowerGrid(
+            (_military("A", 0.0, 850.0), _military("B", 100.0, 850.0)),
+            (GridLine("AB", "A", "B", "military"),),
+            source="A",
+        )
+        report = resilience_report(grid, WEAPON)
+        assert report["per_load"] == ()
+        assert report["total_critical_mw"] == 0.0
+        assert report["served_fraction"] == 0.0
+        assert report["min_reliability"] == 0.0
+        assert report["min_disjoint_paths"] == 0
+
     def test_deterministic(self) -> None:
         grid = _canonical()
         assert resilience_report(grid, WEAPON) == resilience_report(grid, WEAPON)
@@ -215,3 +305,45 @@ def _canonical():
     from goldeneye.scenario import ARKANGEL
 
     return ARKANGEL.grid
+
+
+class TestValidationGuards:
+    """Each constructor guard must be provably reachable."""
+
+    def test_node_name_must_be_non_empty(self) -> None:
+        with pytest.raises(ValueError, match="GridNode.name must be non-empty"):
+            GridNode("   ", 0.0, 0.0, 0.0, False, "military")
+
+    def test_line_name_must_be_non_empty(self) -> None:
+        with pytest.raises(ValueError, match="GridLine.name must be non-empty"):
+            GridLine(" ", "A", "B", "military")
+
+    def test_duplicate_line_names_rejected(self) -> None:
+        with pytest.raises(ValueError, match="duplicate grid line names"):
+            PowerGrid(
+                (_military("A", 0.0, 850.0), _military("B", 100.0, 850.0), _military("C", 50.0, 850.0)),
+                (GridLine("dup", "A", "B", "military"), GridLine("dup", "B", "C", "military")),
+                source="A",
+            )
+
+    def test_line_survival_unknown_line_raises(self) -> None:
+        grid = PowerGrid(
+            (_military("A", 0.0, 850.0), _military("B", 100.0, 850.0)),
+            (GridLine("AB", "A", "B", "military"),),
+            source="A",
+        )
+        with pytest.raises(KeyError, match="unknown grid line"):
+            line_survival_probability(grid, WEAPON, "ghost")
+
+    def test_path_reliability_rejects_empty_path(self) -> None:
+        with pytest.raises(ValueError, match="at least one node"):
+            path_reliability(_canonical(), WEAPON, ())
+
+    def test_line_field_unknown_line_raises(self) -> None:
+        grid = PowerGrid(
+            (_military("A", 0.0, 850.0), _military("B", 100.0, 850.0)),
+            (GridLine("AB", "A", "B", "military"),),
+            source="A",
+        )
+        with pytest.raises(KeyError, match="unknown grid line"):
+            line_field_vm(grid, WEAPON, "ghost")

@@ -13,6 +13,7 @@ The consuming orchestrator is ``scripts/z_generate_manuscript_variables.py``
 
 from __future__ import annotations
 
+import math
 import platform
 import re
 from datetime import datetime, timezone
@@ -22,6 +23,7 @@ from typing import Any
 import numpy as np
 import yaml
 
+from goldeneye import emp_model
 from goldeneye.kill_radius import VULNERABILITY_CLASSES
 from goldeneye.scenario import analyze_arkangel, load_scenario_config
 
@@ -56,9 +58,21 @@ def load_manuscript_config(config_path: str | Path | None = None) -> dict[str, A
     return data
 
 
-def _class_token_suffix(name: str) -> str:
-    """Map a vulnerability-class slug to its token suffix (``UNPROTECTED``)."""
-    return name.upper()
+def _non_finite_tokens(variables: dict[str, str]) -> list[str]:
+    """Token names whose value parses as a float but is NaN or infinite.
+
+    Non-numeric values (titles, risk ratings, class-name lists) are skipped:
+    only values that *claim* to be numbers are checked.
+    """
+    bad: list[str] = []
+    for token, value in variables.items():
+        try:
+            number = float(value)
+        except ValueError:
+            continue
+        if not math.isfinite(number):
+            bad.append(token)
+    return sorted(bad)
 
 
 def generate_variables(
@@ -71,8 +85,13 @@ def generate_variables(
 
     Args:
         config_path: Override for ``manuscript/config.yaml``.
-        require_outputs: When True (default), gate on a non-empty scenario
-            analysis (the strict-mode check that keeps metrics real).
+        require_outputs: When True (default), refuse to return a map in which
+            any numeric token is NaN or infinite (the strict-mode check that
+            keeps metrics real). Set False for draft renders.
+
+    Raises:
+        ValueError: In strict mode, when the analysis yields a non-finite
+            numeric token.
         now: Deterministic timestamp override (used by tests).
     """
     config = load_manuscript_config(config_path)
@@ -90,6 +109,7 @@ def generate_variables(
     kill_table = analysis["kill_radius"]
 
     per_class_radius = {row["name"]: row["radius_km"] for row in kill_table}
+    per_class_threshold = {row["name"]: row["damage_threshold_vm"] for row in kill_table}
 
     orbit = analysis["orbit"]
     coupling = analysis["coupling"]
@@ -98,15 +118,17 @@ def generate_variables(
     grid_per_load = {row["load"]: row for row in grid["per_load"]}
     stations = hydro["stations"]
 
-    if require_outputs and not kill_table:
-        raise ValueError("ARKANGEL analysis produced no kill-radius rows — gate refused")
-
     variables: dict[str, str] = {
         "GE_IDENTITY": "GOLDENEYE",
         "GE_CODENAME": str(analysis["codename"]),
         "GE_TITLE": str(paper.get("title", "")),
         "GE_SUBTITLE": str(paper.get("subtitle", "")),
         "GE_VERSION": str(paper.get("version", "")),
+        # --- EMP model constants (module-level, auditable) ---
+        "GE_E1_REFERENCE_VM": _fmt(emp_model.E1_REFERENCE_VM, 0),
+        "GE_REFERENCE_YIELD_KT": _fmt(emp_model.REFERENCE_YIELD_KT, 0),
+        "GE_GAMMA_FRACTION_PCT": _fmt(emp_model.GAMMA_YIELD_FRACTION * 100.0, 1),
+        "GE_YIELD_EXPONENT": _fmt(emp_model.YIELD_SCALING_EXPONENT, 2),
         # --- EMP threat ---
         "GE_YIELD_KT": _fmt(emp["yield_kt"]),
         "GE_BURST_ALTITUDE_KM": _fmt(emp["burst_altitude_km"]),
@@ -121,6 +143,10 @@ def generate_variables(
         "GE_RADIUS_MILITARY_KM": _fmt(per_class_radius["military"]),
         "GE_RADIUS_LEGACY_TUBE_KM": _fmt(per_class_radius["legacy_tube"]),
         "GE_FRACTION_UNPROTECTED": _fmt(access["kill_area_fraction_unprotected"] * 100.0),
+        "GE_THRESHOLD_UNPROTECTED_VM": _fmt(per_class_threshold["unprotected"], 0),
+        "GE_THRESHOLD_COMMERCIAL_VM": _fmt(per_class_threshold["commercial"], 0),
+        "GE_THRESHOLD_MILITARY_VM": _fmt(per_class_threshold["military"], 0),
+        "GE_THRESHOLD_LEGACY_TUBE_VM": _fmt(per_class_threshold["legacy_tube"], 0),
         # --- Dam / flood ---
         "GE_RESERVOIR_VOLUME_M3": _fmt(dam["volume_m3"], 0),
         "GE_DAM_HEAD_M": _fmt(dam["head_m"]),
@@ -137,6 +163,12 @@ def generate_variables(
         "GE_SECURITY_SCORE": _fmt(access["security_score"]),
         "GE_NUM_LAYERS": str(access["num_layers"]),
         # --- Orbital platform ---
+        "GE_ORBIT_ALTITUDE_KM": _fmt(orbit["altitude_km"], 0),
+        "GE_ORBIT_RADIUS_KM": _fmt(orbit["radius_km"], 0),
+        "GE_ORBIT_MIN_ELEVATION_DEG": _fmt(orbit["min_elevation_deg"], 0),
+        "GE_ORBIT_NADIR_LAT_DEG": _fmt(orbit["nadir_lat_deg"]),
+        "GE_ORBIT_NADIR_LON_DEG": _fmt(orbit["nadir_lon_deg"]),
+        "GE_ORBIT_TARGET_LAT_DEG": _fmt(orbit["target_lat_deg"]),
         "GE_ORBIT_PERIOD_MIN": _fmt(orbit["period_min"]),
         "GE_ORBIT_SPEED_KMS": _fmt(orbit["speed_kms"]),
         "GE_ORBIT_ELEVATION_DEG": _fmt(orbit["elevation_angle_deg"]),
@@ -144,6 +176,12 @@ def generate_variables(
         "GE_ORBIT_CENTRAL_ANGLE_DEG": _fmt(orbit["central_angle_deg"]),
         "GE_ORBIT_PASS_DURATION_MIN": _fmt(orbit["pass_duration_min"]),
         # --- Coupling / shielding ---
+        "GE_COUPLING_CONDUCTOR_LENGTH_M": _fmt(coupling["conductor_length_m"], 0),
+        "GE_COUPLING_SHIELD_MATERIAL": str(coupling["shield_material"]),
+        "GE_COUPLING_SHIELD_THICKNESS_MM": _fmt(coupling["shield_thickness_mm"], 2),
+        "GE_COUPLING_FREQUENCY_MHZ": _fmt(coupling["frequency_mhz"], 0),
+        "GE_COUPLING_IMPEDANCE_OHM": _fmt(coupling["impedance_ohm"], 0),
+        "GE_MILITARY_WITHSTAND_VM": _fmt(coupling["military_withstand_vm"], 0),
         "GE_COUPLING_FACILITY_FIELD_VM": _fmt(coupling["facility_field_vm"], 0),
         "GE_COUPLING_EFFECTIVE_HEIGHT_M": _fmt(coupling["effective_height_m"]),
         "GE_COUPLING_INDUCED_V": _fmt(coupling["induced_voltage_v"], 0),
@@ -175,6 +213,17 @@ def generate_variables(
         "NUMPY_VERSION": np.__version__,
         "GENERATION_TIMESTAMP": (now or datetime.now(timezone.utc)).isoformat(timespec="seconds"),
     }
+
+    if require_outputs:
+        # Strict mode: refuse to hand the manuscript a token that is NaN or
+        # infinite. A degenerate scenario (zero-volume reservoir, unreachable
+        # load, zero-field asset) silently produces such values, and a rendered
+        # "nan V/m" would read as a result. This gate can fail — see
+        # tests/test_manuscript_variables.py::TestStrictModeGate.
+        broken = _non_finite_tokens(variables)
+        if broken:
+            raise ValueError(f"ARKANGEL analysis produced non-finite manuscript tokens — gate refused: {broken}")
+
     return variables
 
 

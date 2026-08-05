@@ -136,3 +136,28 @@ class TestOrbitGeometryValidation:
     def test_valid(self) -> None:
         g = OrbitGeometry(300.0, 60.0, 108.0, 53.5, 108.0, 10.0)
         assert g.altitude_km == 300.0
+
+
+class TestElevationDegenerateGeometry:
+    def test_zero_central_angle_is_directly_overhead(self) -> None:
+        # Observer coincident with the sub-platform point: the platform is at
+        # the zenith, exactly 90 degrees elevation.
+        assert elevation_angle_deg(53.5, 108.0, 53.5, 108.0, 300000.0) == pytest.approx(90.0)
+
+    def test_antipodal_platform_is_ninety_degrees_below_the_horizon(self) -> None:
+        # At the antipode the platform is on the far side of the Earth, so the
+        # elevation is -90 (not +90): the sign carries the visibility meaning.
+        assert elevation_angle_deg(0.0, 0.0, 0.0, 180.0, 300000.0) == pytest.approx(-90.0)
+        assert not is_visible(0.0, 0.0, 0.0, 180.0, 300000.0, 0.0)
+
+    def test_central_angle_is_clamped_to_the_half_turn(self) -> None:
+        # The clamp in central_angle_deg is what keeps sin(gamma) >= 0 for every
+        # value the public elevation path can ever see.
+        assert central_angle_deg(0.0, 0.0, 0.0, 180.0) == pytest.approx(180.0)
+        assert 0.0 <= central_angle_deg(60.0, 108.0, 53.5, 108.0) <= 180.0
+
+    def test_pass_duration_is_zero_at_or_above_zenith_requirement(self) -> None:
+        # Requiring 90 degrees minimum elevation admits only the instant of
+        # zenith, so no usable pass window exists.
+        assert overhead_pass_duration_s(300000.0, 90.0) == 0.0
+        assert overhead_pass_duration_s(300000.0, 95.0) == 0.0

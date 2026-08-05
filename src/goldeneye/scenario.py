@@ -357,6 +357,12 @@ def _orbit_section(orbit: OrbitGeometry) -> dict[str, Any]:
     pass_duration = overhead_pass_duration_s(altitude_m, orbit.min_elevation_deg)
     return {
         "altitude_km": orbit.altitude_km,
+        "radius_km": radius / 1000.0,
+        "min_elevation_deg": orbit.min_elevation_deg,
+        "nadir_lat_deg": orbit.nadir_lat_deg,
+        "nadir_lon_deg": orbit.nadir_lon_deg,
+        "target_lat_deg": orbit.target_lat_deg,
+        "target_lon_deg": orbit.target_lon_deg,
         "period_min": period / 60.0,
         "speed_kms": speed / 1000.0,
         "central_angle_deg": gamma,
@@ -388,6 +394,12 @@ def _coupling_section(
     return {
         "facility_field_vm": facility_field_vm,
         "elevation_angle_deg": elevation_deg,
+        "conductor_length_m": cp.conductor_length_m,
+        "shield_material": cp.shield_material,
+        "shield_thickness_mm": cp.shield_thickness_mm,
+        "frequency_mhz": cp.e1_frequency_hz / 1.0e6,
+        "impedance_ohm": cp.impedance_ohm,
+        "military_withstand_vm": MILITARY_WITHSTAND_VM,
         "effective_height_m": h_eff,
         "induced_voltage_v": induced,
         "skin_depth_mm": delta * 1000.0,

@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 
 from goldeneye.breach_hydrograph import (
-    FROEHLICH_OVERTTOPING_FACTOR,
+    FROEHLICH_OVERTOPPING_FACTOR,
     FROEHLICH_PIPING_FACTOR,
     Station,
     breach_average_width_m,
@@ -24,7 +24,7 @@ Q_P = 0.607 * V**0.295 * H**1.24  # Froehlich peak discharge (~31.8k m^3/s)
 class TestBreachWidth:
     def test_froehlich_2008_overtopping(self) -> None:
         width = breach_average_width_m(V, H, overtopping=True)
-        assert width == pytest.approx(0.27 * FROEHLICH_OVERTTOPING_FACTOR * V**0.32 * H**0.04)
+        assert width == pytest.approx(0.27 * FROEHLICH_OVERTOPPING_FACTOR * V**0.32 * H**0.04)
 
     def test_overtopping_wide_than_piping(self) -> None:
         assert breach_average_width_m(V, H, overtopping=True) > breach_average_width_m(V, H, overtopping=False)
@@ -130,3 +130,13 @@ class TestReport:
         import json
 
         json.dumps(breach_hydrograph_report(V, H, (Station("facility", 8.0, 10.0),)))
+
+
+class TestMeanOutflowGuards:
+    def test_rejects_non_positive_duration(self) -> None:
+        with pytest.raises(ValueError, match="must both be > 0"):
+            mean_outflow_cms(1.0e8, 0.0)
+
+    def test_rejects_non_positive_volume(self) -> None:
+        with pytest.raises(ValueError, match="must both be > 0"):
+            mean_outflow_cms(0.0, 100.0)

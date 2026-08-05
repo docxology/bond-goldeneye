@@ -35,3 +35,11 @@ uncertainties." *Journal of Hydraulic Engineering*, 134(12), 1708–1721.
 Buldyrev, S. V., Parshani, R., Paul, G., Stanley, H. E., and Havlin, S. (2010).
 "Catastrophic cascade of failures in interdependent networks." *Nature*,
 464, 1025–1028.
+
+Dijkstra, E. W. (1959). "A note on two problems in connexion with graphs."
+*Numerische Mathematik*, 1(1), 269–271.
+
+Edmonds, J. and Karp, R. M. (1972). "Theoretical improvements in algorithmic
+efficiency for network flow problems." *Journal of the ACM*, 19(2), 248–264.
+
+Schelkunoff, S. A. (1943). *Electromagnetic Waves*. D. Van Nostrand, New York.

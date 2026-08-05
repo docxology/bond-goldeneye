@@ -8,6 +8,7 @@ same gate that keeps prose from drifting from the code.
 
 from __future__ import annotations
 
+import math
 import re
 from pathlib import Path
 
@@ -158,6 +159,49 @@ class TestResolveTree:
             strict=False,
         )
         assert files == ["00_abstract.md"]
+
+
+class TestStrictModeGate:
+    """The strict-mode gate must be falsifiable, not green by construction.
+
+    It replaced a ``not kill_table`` check that could never fire (the kill
+    table is built from a non-empty module constant), so it carries its own
+    positive control: a real config that drives a real token to infinity.
+    """
+
+    _DEGENERATE = (
+        "paper:\n"
+        '  title: "Degenerate"\n'
+        '  version: "0.0.0"\n'
+        "scenario:\n"
+        "  coupling:\n"
+        # An absurd shield thickness overflows the absorption term (8.686*t/delta)
+        # and drives GE_COUPLING_SE_DB to infinity.
+        "    shield_thickness_mm: 1.0e308\n"
+    )
+
+    def test_gate_rejects_non_finite_token(self, tmp_path: Path) -> None:
+        config = tmp_path / "config.yaml"
+        config.write_text(self._DEGENERATE, encoding="utf-8")
+        with pytest.raises(ValueError, match="non-finite manuscript tokens"):
+            generate_variables(config_path=config)
+
+    def test_gate_names_the_offending_token(self, tmp_path: Path) -> None:
+        config = tmp_path / "config.yaml"
+        config.write_text(self._DEGENERATE, encoding="utf-8")
+        with pytest.raises(ValueError, match="GE_COUPLING_SE_DB"):
+            generate_variables(config_path=config)
+
+    def test_draft_mode_bypasses_the_gate(self, tmp_path: Path) -> None:
+        config = tmp_path / "config.yaml"
+        config.write_text(self._DEGENERATE, encoding="utf-8")
+        variables = generate_variables(config_path=config, require_outputs=False)
+        assert not math.isfinite(float(variables["GE_COUPLING_SE_DB"]))
+
+    def test_canonical_scenario_passes_the_gate(self) -> None:
+        # The negative control: the shipped scenario must clear it.
+        variables = generate_variables()
+        assert variables["GE_CODENAME"] == "ARKANGEL"
 
 
 def test_deepened_tokens_present_and_sensible() -> None:
