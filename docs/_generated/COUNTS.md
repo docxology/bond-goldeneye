@@ -9,7 +9,7 @@
 
 | Metric | Value |
 | --- | --- |
-| Tests passed | 325 |
+| Tests passed | 335 |
 | Tests failed / skipped | 0 / 0 |
 | Line + branch coverage (src/) | 99.65% |
 | Coverage floor | 90% (line + branch) |
@@ -40,6 +40,6 @@ are unreachable through the public API given upstream invariants that are
 themselves pinned by tests.
 
 Other gates from the same checkout: `ruff check` clean, `ruff format --check`
-clean (46 files), `mypy src/ scripts/` clean (23 source files).
+clean (47 files), `mypy src/ scripts/` clean (23 source files).
 
 Zero mocks; deterministic; pure core verified importable without bond-api.

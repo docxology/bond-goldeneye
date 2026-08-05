@@ -28,8 +28,15 @@ suggestions. Read this file before modifying any project file.
 
 5. **Deterministic.** Fixed scenario parameters (declared in
    `manuscript/config.yaml`), a fixed seed of 0, no untracked RNG, and no
-   wall-clock value in persisted analysis artifacts. Two runs of
-   `analyze_arkangel(ARKANGEL)` must be byte-identical (tested).
+   wall-clock value in any artifact covered by the byte-identity claim in
+   `manuscript/06_reproducibility.md` (the outcome JSON, the token map, the
+   resolved sections, the figures). Never call `datetime.now`, `utcnow`, or
+   `time.time` in `manuscript_variables.py` or anything it reaches — a
+   generation timestamp makes every regeneration differ, which is exactly the
+   breach that `tests/test_reproducibility.py` now catches by regenerating the
+   covered set twice and comparing bytes. Real timestamps belong only in the
+   run-scoped provenance record `output/data/arkangel_mission.json`, which the
+   claim explicitly excludes.
 
 6. **Manuscript tokens.** Every number in prose — result, model constant, or
    scenario input — uses a `{{TOKEN}}` from `generate_variables()`. Never

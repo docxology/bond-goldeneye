@@ -48,8 +48,11 @@ the protection margin is declared in `src/goldeneye/scenario.py`.
 
 The package is tested under Python **{{PYTHON_VERSION}}** with NumPy
 **{{NUMPY_VERSION}}** and matplotlib; bond-api and bond-utilities are installed as
-local path dependencies. Execution environment snapshot was generated at
-**{{GENERATION_TIMESTAMP}}**.
+local path dependencies. This environment snapshot belongs to manuscript
+revision **{{GE_MANUSCRIPT_DATE}}**, the date declared in
+`manuscript/config.yaml`. No token reads the wall clock at generation time, so
+regenerating the manuscript in this environment rewrites the same bytes (see
+§Reproducibility).
 
 ## Verification gates
 

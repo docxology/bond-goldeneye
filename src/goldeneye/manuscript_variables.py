@@ -16,7 +16,6 @@ from __future__ import annotations
 import math
 import platform
 import re
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -91,9 +90,16 @@ def generate_variables(
     *,
     config_path: str | Path | None = None,
     require_outputs: bool = True,
-    now: datetime | None = None,
 ) -> dict[str, str]:
     """Compute the ``{{TOKEN}}`` → value mapping for the manuscript.
+
+    No token reads the wall clock. Every value derives from committed sources
+    (``manuscript/config.yaml``, module constants, the closed-form analysis) or
+    from the interpreter environment, so regenerating the manuscript twice in
+    one environment writes byte-identical artifacts. The dated token
+    ``GE_MANUSCRIPT_DATE`` is the manuscript revision date declared in the
+    config, not a generation timestamp. Held by
+    ``tests/test_reproducibility.py``.
 
     Args:
         config_path: Override for ``manuscript/config.yaml``.
@@ -104,7 +110,6 @@ def generate_variables(
     Raises:
         ValueError: In strict mode, when the analysis yields a non-finite
             numeric token.
-        now: Deterministic timestamp override (used by tests).
     """
     config = load_manuscript_config(config_path)
     paper = config.get("paper", {})
@@ -136,6 +141,10 @@ def generate_variables(
         "GE_TITLE": str(paper.get("title", "")),
         "GE_SUBTITLE": str(paper.get("subtitle", "")),
         "GE_VERSION": str(paper.get("version", "")),
+        # Committed revision date from manuscript/config.yaml — NOT a wall
+        # clock. Rendering a generation timestamp here would make every
+        # regeneration differ; see tests/test_reproducibility.py.
+        "GE_MANUSCRIPT_DATE": str(paper.get("date", "")),
         # --- EMP model constants (module-level, auditable) ---
         "GE_E1_REFERENCE_VM": _fmt(emp_model.E1_REFERENCE_VM, 0),
         "GE_REFERENCE_YIELD_KT": _fmt(emp_model.REFERENCE_YIELD_KT, 0),
@@ -239,7 +248,6 @@ def generate_variables(
         # --- Environment ---
         "PYTHON_VERSION": platform.python_version(),
         "NUMPY_VERSION": np.__version__,
-        "GENERATION_TIMESTAMP": (now or datetime.now(timezone.utc)).isoformat(timespec="seconds"),
     }
 
     if require_outputs:

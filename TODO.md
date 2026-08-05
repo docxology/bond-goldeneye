@@ -8,15 +8,29 @@ regional grid resilience, dam access control, breach hydrograph), composed by
 `scenario.py` and exposed to the suite through the frozen
 `bond_api.MissionProvider` adapter in `src/goldeneye/mission.py`.
 
-**Verified state, measured 2026-08-05 on `2cc0f39`:** `uv run pytest tests/
---cov=src --cov-fail-under=90` → **325 passed, 0 failed, 0 skipped, 99.65%
+**Verified state, measured 2026-08-05:** `uv run pytest tests/
+--cov=src --cov-fail-under=90` → **335 passed, 0 failed, 0 skipped, 99.65%
 line+branch coverage** of `src/` (2 statements, 3 branches uncovered). `ruff
-check`, `ruff format --check` (46 files), and `mypy src/ scripts/` (23 files)
+check`, `ruff format --check` (47 files), and `mypy src/ scripts/` (23 files)
 are all clean; the zero-mock and lineage greps return nothing. All ten findings
 in `output/verify/goldeneye.json` were re-checked against the tree this session
 and are fixed at source — the open work below is what remains after them.
 
 Live counts live in `docs/_generated/COUNTS.md`; do not retype them elsewhere.
+
+**Closed 2026-08-05 — the reproducibility claim was false.**
+`manuscript_variables.py` built a `GENERATION_TIMESTAMP` token from
+`datetime.now(timezone.utc)` and rendered it into
+`manuscript/05_experimental_setup.md`, so every regeneration wrote different
+bytes while `manuscript/06_reproducibility.md` claimed "no wall-clock value in
+any persisted analysis artifact". The wall clock is gone: the dated token is now
+`GE_MANUSCRIPT_DATE`, read from the committed `paper.date` in
+`manuscript/config.yaml`. `06_reproducibility.md` now names the covered artifact
+set and the one exclusion (`output/data/arkangel_mission.json`, the run-scoped
+provenance record whose `started_at` is a real clock).
+`tests/test_reproducibility.py` regenerates the covered set twice per run and
+compares bytes — proven able to fail by temporarily reintroducing the clock.
+*Command:* `uv run pytest tests/test_reproducibility.py -v`
 
 ---
 

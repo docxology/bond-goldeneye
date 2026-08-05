@@ -21,11 +21,36 @@ from source by a regenerable pipeline; none is hand-authored.
 ## Determinism
 
 The analysis is fully deterministic: fixed scenario parameters, closed-form
-physics, a fixed seed of 0 (no random draws anywhere), and no wall-clock value
-in any persisted analysis artifact. The canonical SHA-256 `input_hash` of the
-scenario (16 hex characters appear in the execution report) lets any outcome
-be audited against the exact inputs that produced it. Two successive runs of
-`analyze_arkangel` are byte-identical by test.
+physics, and a fixed seed of 0 (no random draws anywhere). The canonical
+SHA-256 `input_hash` of the scenario (16 hex characters appear in the execution
+report) lets any outcome be audited against the exact inputs that produced it.
+
+**Byte-identity claim and its scope.** Re-running `scripts/execute.py` and
+`scripts/z_generate_manuscript_variables.py` in one environment rewrites the
+following artifacts byte for byte:
+
+- `output/data/arkangel_outcome.json`
+- `output/data/manuscript_variables.json`
+- `output/manuscript/*.md` (the resolved sections)
+- `output/figures/*.png`
+
+No token in that set reads the wall clock; the dated token in
+`05_experimental_setup.md` is the committed `paper.date` from
+`manuscript/config.yaml`, not a generation time.
+`tests/test_reproducibility.py` regenerates the whole set twice in one test run
+and compares the bytes, so the claim fails loudly if a wall-clock value is ever
+reintroduced.
+
+Two exclusions, stated rather than hidden:
+
+1. `output/data/arkangel_mission.json` is a **run-scoped provenance record**
+   written through `bond_utilities.mission_io`. It deliberately carries a real
+   `started_at` wall clock and therefore differs between runs. It is not
+   covered by the byte-identity claim.
+2. Byte-identity is claimed *within one environment*. `{{PYTHON_VERSION}}` and
+   `{{NUMPY_VERSION}}` are environment provenance, so a different interpreter
+   or NumPy build legitimately changes those two tokens and the sections that
+   render them.
 
 ## Output inventory
 

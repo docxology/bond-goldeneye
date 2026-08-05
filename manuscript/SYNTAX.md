@@ -28,7 +28,12 @@ edited. The full token map is the return value of
 | `{{GE_COUPLING_FACILITY_FIELD_VM}}` / `{{GE_COUPLING_EFFECTIVE_HEIGHT_M}}` / `{{GE_COUPLING_INDUCED_V}}` / `{{GE_COUPLING_SKIN_DEPTH_MM}}` / `{{GE_COUPLING_SE_DB}}` / `{{GE_COUPLING_SHIELDED_FIELD_VM}}` / `{{GE_COUPLING_MARGIN_DB}}` / `{{GE_COUPLING_CONDUCTED_A}}` | Coupling / shielding |
 | `{{GE_GRID_NUM_NODES}}` / `{{GE_GRID_NUM_LINES}}` / `{{GE_GRID_DOWN_NODES}}` / `{{GE_GRID_EXPECTED_SERVED_MW}}` / `{{GE_GRID_TOTAL_CRITICAL_MW}}` / `{{GE_GRID_SERVED_FRACTION}}` / `{{GE_GRID_MIN_RELIABILITY}}` / `{{GE_GRID_MIN_DISJOINT_PATHS}}` / `{{GE_FACILITY_RELIABILITY}}` / `{{GE_FACILITY_DISJOINT_PATHS}}` | Regional grid resilience |
 | `{{GE_BREACH_WIDTH_M}}` / `{{GE_HYDROGRAPH_DURATION_MIN}}` / `{{GE_MEAN_OUTFLOW_CMS}}` / `{{GE_NUM_STATIONS}}` / `{{GE_FARTHEST_STATION_KM}}` / `{{GE_FARTHEST_ARRIVAL_MIN}}` | Breach hydrograph |
-| `{{PYTHON_VERSION}}` / `{{NUMPY_VERSION}}` / `{{GENERATION_TIMESTAMP}}` | Environment |
+| `{{PYTHON_VERSION}}` / `{{NUMPY_VERSION}}` | Environment |
+| `{{GE_MANUSCRIPT_DATE}}` | Committed revision date (`paper.date` in `manuscript/config.yaml`) |
+
+No token may read the wall clock: a generation timestamp would make every
+regeneration differ, breaking the byte-identity claim in `06_reproducibility.md`
+(held by `tests/test_reproducibility.py`).
 
 ## Figures
 
