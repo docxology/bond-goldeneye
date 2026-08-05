@@ -115,8 +115,13 @@ class TestReflectionLoss:
     that do not come from the implementation.
     """
 
-    #: Published Schelkunoff plane-wave reflection losses (dB) for good
-    #: conductors, from the standard EMC tables (Ott 2009, Table 6-4 family).
+    #: Reference plane-wave reflection losses (dB), rounded to the nearest dB.
+    #: Copper at 1 MHz is the value quoted throughout the EMC literature
+    #: (~108 dB); the rest are the standard handbook form
+    #: ``168 - 10 log10(mu_r f / sigma_r)`` evaluated by hand for these
+    #: materials. No specific table or page is cited here because none was
+    #: consulted directly — the anchor is the well-known copper figure plus
+    #: hand arithmetic in an independent formulation.
     TEXTBOOK_DB = {
         ("copper", 1.0e6): 108.0,
         ("copper", 1.0e8): 88.0,
@@ -124,7 +129,7 @@ class TestReflectionLoss:
         ("steel", 1.0e6): 77.0,
     }
 
-    def test_matches_published_table(self) -> None:
+    def test_matches_reference_values(self) -> None:
         for (material, frequency), expected_db in self.TEXTBOOK_DB.items():
             rho, mu_r = lookup_material(material)
             got = plane_wave_reflection_db(frequency, rho, mu_r)
