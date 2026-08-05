@@ -29,6 +29,10 @@ from dataclasses import dataclass
 
 __all__ = [
     "DEFAULT_ACCESS_LAYERS",
+    "FROEHLICH_PEAK_COEFFICIENT",
+    "FROEHLICH_PEAK_HEAD_EXPONENT",
+    "FROEHLICH_PEAK_VOLUME_EXPONENT",
+    "RITTER_DEPTH_COEFFICIENT",
     "SecurityLayer",
     "Reservoir",
     "access_corridor",
@@ -50,6 +54,14 @@ __all__ = [
 
 #: Gravitational acceleration (m/s^2) — matches emp_model.GRAVITATIONAL_ACCELERATION.
 GRAVITY = 9.80665
+
+#: Froehlich (1995) peak-outflow regression ``Q_p = 0.607 V^0.295 H^1.24``
+#: (SI units): coefficient and exponents. Froehlich, D.C. (1995), "Peak
+#: outflow from breached embankment dam," *J. Water Resour. Plann. Manage.*
+#: 121(1), 90-97.
+FROEHLICH_PEAK_COEFFICIENT = 0.607
+FROEHLICH_PEAK_VOLUME_EXPONENT = 0.295
+FROEHLICH_PEAK_HEAD_EXPONENT = 1.24
 
 #: Reference detection probability for the security-score numerator.
 REFERENCE_DETECTION_PROBABILITY = 1.0
@@ -247,7 +259,11 @@ def breach_peak_discharge_cms(volume_m3: float, head_m: float) -> float:
     """
     if volume_m3 <= 0 or head_m <= 0:
         raise ValueError("volume_m3 and head_m must both be > 0")
-    return float(0.607 * float(volume_m3) ** 0.295 * float(head_m) ** 1.24)
+    return float(
+        FROEHLICH_PEAK_COEFFICIENT
+        * float(volume_m3) ** FROEHLICH_PEAK_VOLUME_EXPONENT
+        * float(head_m) ** FROEHLICH_PEAK_HEAD_EXPONENT
+    )
 
 
 def ritter_depth_m(x_m: float, t_s: float, head_m: float) -> float:

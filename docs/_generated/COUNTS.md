@@ -9,7 +9,7 @@
 
 | Metric | Value |
 | --- | --- |
-| Tests passed | 311 |
+| Tests passed | 325 |
 | Tests failed / skipped | 0 / 0 |
 | Line + branch coverage (src/) | 99.65% |
 | Coverage floor | 90% (line + branch) |
@@ -30,11 +30,11 @@
 | `src/goldeneye/mission.py` | 100.00% |
 | `src/goldeneye/scenario.py` | 100.00% |
 | `src/goldeneye/grid_resilience.py` | 99.64% |
-| `src/goldeneye/dam_security.py` | 98.77% |
+| `src/goldeneye/dam_security.py` | 98.79% |
 | `src/goldeneye/orbital_mechanics.py` | 98.36% |
 
 Residual misses are the two defensive branches documented in
-`docs/architecture.md` (`dam_security.py:186`, `orbital_mechanics.py:149`) and
+`docs/architecture.md` (`dam_security.py:198`, `orbital_mechanics.py:149`) and
 the max-flow loop's non-exiting back-edge (`grid_resilience.py:257->281`). All
 are unreachable through the public API given upstream invariants that are
 themselves pinned by tests.

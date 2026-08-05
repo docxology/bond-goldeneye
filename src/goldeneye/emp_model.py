@@ -65,11 +65,19 @@ GRAVITATIONAL_ACCELERATION = 9.80665
 VACUUM_PERMITTIVITY = 8.8541878128e-12
 
 #: Prompt-gamma fraction of total fission yield (~0.3%, Glasstone & Dolan).
+#:
+#: **Reported, not consumed.** This envelope is anchored empirically at
+#: :data:`E1_REFERENCE_VM` for :data:`REFERENCE_YIELD_KT`; it does not
+#: integrate a Compton source term, so no function in this module reads this
+#: constant. It is carried as documented provenance for the amplitude anchor
+#: (and surfaced in the mission recon payload), and
+#: ``tests/test_emp_model.py::TestGammaFractionIsReportedNotConsumed`` proves
+#: that perturbing it changes no computed field.
 GAMMA_YIELD_FRACTION = 0.003
 
 #: Reference yield (kt) at which ``E1_REFERENCE_VM`` is the E1 peak. Starfish
-#: Prime (1964, ~1.4 MT at 400 km altitude) measured E1 of tens of kV/m over
-#: wide areas; 1000 kt is a clean reference anchor.
+#: Prime (9 July 1962, ~1.4 MT at 400 km altitude) measured E1 of tens of kV/m
+#: over wide areas; 1000 kt is a clean reference anchor.
 REFERENCE_YIELD_KT = 1000.0
 
 #: E1 peak amplitude (V/m) at the reference yield (standard HEMP figure: ~50 kV/m).

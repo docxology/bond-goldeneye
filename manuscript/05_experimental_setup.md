@@ -31,9 +31,13 @@ enclosure, **{{GE_COUPLING_FREQUENCY_MHZ}}** MHz reference frequency,
 
 The EMP envelope constants are fixed in `src/goldeneye/emp_model.py`: an
 amplitude anchor of **{{GE_E1_REFERENCE_VM}}** V/m at the
-**{{GE_REFERENCE_YIELD_KT}}** kt reference yield, a
-**{{GE_GAMMA_FRACTION_PCT}}**\% prompt-gamma fraction, and an empirical yield
-exponent of **{{GE_YIELD_EXPONENT}}**. (The **{{GE_NADIR_FIELD_VM}}** V/m nadir
+**{{GE_REFERENCE_YIELD_KT}}** kt reference yield and an empirical yield
+exponent of **{{GE_YIELD_EXPONENT}}**. The same module also records a
+**{{GE_GAMMA_FRACTION_PCT}}**\% prompt-gamma fraction, but no function reads
+it — the envelope has no Compton source term, so that value is provenance for
+the amplitude anchor rather than a parameter of the calculation
+(`tests/test_emp_model.py::TestGammaFractionIsReportedNotConsumed` holds this
+to be true). (The **{{GE_NADIR_FIELD_VM}}** V/m nadir
 field reported in the results is *computed* from those constants at the
 scenario yield, not itself a constant.) The **{{GE_NUM_CLASSES}}**
 vulnerability-class thresholds are fixed in `src/goldeneye/kill_radius.py`,

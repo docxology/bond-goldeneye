@@ -7,6 +7,9 @@ import pytest
 from goldeneye.breach_hydrograph import (
     FROEHLICH_OVERTOPPING_FACTOR,
     FROEHLICH_PIPING_FACTOR,
+    FROEHLICH_WIDTH_COEFFICIENT,
+    FROEHLICH_WIDTH_HEAD_EXPONENT,
+    FROEHLICH_WIDTH_VOLUME_EXPONENT,
     Station,
     breach_average_width_m,
     breach_hydrograph_report,
@@ -22,17 +25,36 @@ Q_P = 0.607 * V**0.295 * H**1.24  # Froehlich peak discharge (~31.8k m^3/s)
 
 
 class TestBreachWidth:
-    def test_froehlich_2008_overtopping(self) -> None:
-        width = breach_average_width_m(V, H, overtopping=True)
-        assert width == pytest.approx(0.27 * FROEHLICH_OVERTOPPING_FACTOR * V**0.32 * H**0.04)
+    def test_froehlich_2008_coefficients_match_the_published_regression(self) -> None:
+        """Pin the constants to the source, not to themselves.
+
+        Froehlich, D.C. (2008), *Embankment dam breach parameters and their
+        uncertainties*: ``B_avg = 0.27 K0 V^0.32 h_b^0.04`` with ``K0 = 1.3``
+        for overtopping and ``1.0`` otherwise (USACE HEC-RAS technical
+        reference, breach-parameter tables). ``K0 = 1.4`` is the factor of
+        Froehlich's *1995* width equation and does not belong here.
+        """
+        assert FROEHLICH_WIDTH_COEFFICIENT == pytest.approx(0.27)
+        assert FROEHLICH_OVERTOPPING_FACTOR == pytest.approx(1.3)
+        assert FROEHLICH_PIPING_FACTOR == pytest.approx(1.0)
+        assert FROEHLICH_WIDTH_VOLUME_EXPONENT == pytest.approx(0.32)
+        assert FROEHLICH_WIDTH_HEAD_EXPONENT == pytest.approx(0.04)
+
+    def test_froehlich_2008_overtopping_arkangel_value(self) -> None:
+        # Hand-computed from the published regression, independent of the
+        # module constants: 0.27 * 1.3 * (1.3e8)^0.32 * 75^0.04 = 164.73 m.
+        assert breach_average_width_m(V, H, overtopping=True) == pytest.approx(164.73, abs=0.05)
 
     def test_overtopping_wide_than_piping(self) -> None:
         assert breach_average_width_m(V, H, overtopping=True) > breach_average_width_m(V, H, overtopping=False)
 
-    def test_piping_factor(self) -> None:
-        assert breach_average_width_m(V, H, overtopping=False) == pytest.approx(
-            0.27 * FROEHLICH_PIPING_FACTOR * V**0.32 * H**0.04
-        )
+    def test_piping_arkangel_value(self) -> None:
+        # Same regression with K0 = 1.0: 0.27 * (1.3e8)^0.32 * 75^0.04 = 126.71 m.
+        assert breach_average_width_m(V, H, overtopping=False) == pytest.approx(126.71, abs=0.05)
+
+    def test_overtopping_ratio_is_k0(self) -> None:
+        ratio = breach_average_width_m(V, H, overtopping=True) / breach_average_width_m(V, H, overtopping=False)
+        assert ratio == pytest.approx(1.3, abs=1e-9)
 
     def test_arkangel_width_is_realistic(self) -> None:
         assert 100.0 < breach_average_width_m(V, H) < 300.0

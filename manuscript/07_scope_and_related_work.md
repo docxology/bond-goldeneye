@@ -33,7 +33,7 @@ depths are idealizations. The Froehlich regression is a statistical peak-
 outflow relation and carries scatter. The breach hydrograph is a
 volume-conserving triangular idealization of a real, irregular outflow curve;
 the downstream station table uses the frictionless asymptotic peak depth
-`4H/9` rather than a full flood-routing model.
+**{{GE_RITTER_DEPTH_COEFF}}**`*H` rather than a full flood-routing model.
 
 **Orbital platform.** The orbital analysis assumes a circular, two-body orbit
 (Bate, Mueller & White) and a directly-overhead pass for the pass-duration
@@ -63,7 +63,7 @@ Dolan, 1977), and the early-time waveform shape follows IEC 61000-2-9.
 Orbital mechanics follow Bate, Mueller & White's *Fundamentals of
 Astrodynamics* (1971). Coupling and shielding follow Ott's *Electromagnetic
 Compatibility Engineering* (2009) and Vance's *Coupling to Shielded Cables*
-(1975). Peak dam-breach outflow is regressed by Froehlich (1995) and breach
+(1978). Peak dam-breach outflow is regressed by Froehlich (1995) and breach
 geometry by Froehlich (2008); the classical instantaneous dam-break solution
 originates with Ritter (1892) and is presented textually in Stoker's *Water
 Waves* (1957). The shielding-effectiveness formulation is Schelkunoff's (1943).

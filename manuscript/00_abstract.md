@@ -44,7 +44,7 @@ reduces the penetrated field to **{{GE_COUPLING_SHIELDED_FIELD_VM}}** V/m. The
 regional power grid (**{{GE_GRID_NUM_NODES}}** nodes,
 **{{GE_GRID_NUM_LINES}}** lines) loses the nodes
 **{{GE_GRID_DOWN_NODES}}** and serves only
-**{{GE_GRID_SERVED_FRACTION}}**\\% of critical load; the mission-critical
+**{{GE_GRID_SERVED_FRACTION}}**\% of critical load; the mission-critical
 facility retains a **{{GE_FACILITY_RELIABILITY}}** survival probability over
 **{{GE_FACILITY_DISJOINT_PATHS}}** redundant paths. A breach hydrograph (average
 width **{{GE_BREACH_WIDTH_M}}** m, duration **{{GE_HYDROGRAPH_DURATION_MIN}}** min)

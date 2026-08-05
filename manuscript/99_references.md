@@ -24,10 +24,10 @@ Interscience Publishers, New York.
 Bate, R. R., Mueller, D. D., and White, J. E. (1971). *Fundamentals of
 Astrodynamics*. Dover Publications, New York.
 
-Ott, H. W. (2009). *Electromagnetic Compatibility Engineering*, 2nd ed.
+Ott, H. W. (2009). *Electromagnetic Compatibility Engineering*.
 John Wiley & Sons, Hoboken, NJ.
 
-Vance, E. F. (1975). *Coupling to Shielded Cables*. Wiley-Interscience, New York.
+Vance, E. F. (1978). *Coupling to Shielded Cables*. Wiley-Interscience, New York.
 
 Froehlich, D. C. (2008). "Embankment dam breach parameters and their
 uncertainties." *Journal of Hydraulic Engineering*, 134(12), 1708–1721.

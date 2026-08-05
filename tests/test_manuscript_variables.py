@@ -14,6 +14,7 @@ from pathlib import Path
 
 import pytest
 
+from goldeneye import breach_hydrograph, coupling, dam_security, emp_model, orbital_mechanics
 from goldeneye.manuscript_variables import (
     PACKAGE_ROOT,
     generate_variables,
@@ -204,14 +205,82 @@ class TestStrictModeGate:
         assert variables["GE_CODENAME"] == "ARKANGEL"
 
 
+class TestModelConstantsAreTokenized:
+    """Rule 6 was prose-only; this makes it a gate.
+
+    Every empirical model coefficient quoted in the methodology must reach the
+    page through a ``{{TOKEN}}`` bound to the module constant that defines it.
+    Retyping the literal in prose is what let a wrong Froehlich factor and a
+    units-broken Schelkunoff form sit in the manuscript unnoticed.
+    """
+
+    #: token name -> (module constant, literal that must NOT appear in prose)
+    REGISTRY: dict[str, tuple[float, str]] = {
+        "GE_FROEHLICH_PEAK_COEFF": (dam_security.FROEHLICH_PEAK_COEFFICIENT, "0.607"),
+        "GE_FROEHLICH_PEAK_VOL_EXP": (dam_security.FROEHLICH_PEAK_VOLUME_EXPONENT, "0.295"),
+        "GE_FROEHLICH_PEAK_HEAD_EXP": (dam_security.FROEHLICH_PEAK_HEAD_EXPONENT, "1.24"),
+        "GE_RITTER_DEPTH_COEFF": (dam_security.RITTER_DEPTH_COEFFICIENT, "4H/9"),
+        "GE_FROEHLICH_WIDTH_COEFF": (breach_hydrograph.FROEHLICH_WIDTH_COEFFICIENT, "0.27"),
+        "GE_FROEHLICH_K0_OVERTOPPING": (breach_hydrograph.FROEHLICH_OVERTOPPING_FACTOR, "1.3\\,"),
+        "GE_FROEHLICH_K0_PIPING": (breach_hydrograph.FROEHLICH_PIPING_FACTOR, "K_0 = 1.0"),
+        "GE_FROEHLICH_WIDTH_VOL_EXP": (breach_hydrograph.FROEHLICH_WIDTH_VOLUME_EXPONENT, "0.32"),
+        "GE_FROEHLICH_WIDTH_HEAD_EXP": (breach_hydrograph.FROEHLICH_WIDTH_HEAD_EXPONENT, "0.04"),
+        "GE_ABSORPTION_DB_PER_SKIN_DEPTH": (coupling.ABSORPTION_DB_PER_SKIN_DEPTH, "8.686"),
+        "GE_FREE_SPACE_IMPEDANCE_OHM": (coupling.FREE_SPACE_IMPEDANCE_OHM, "376.7"),
+        "GE_MU_EARTH_M3S2": (orbital_mechanics.MU_EARTH, "3.986\\times"),
+        "GE_E1_REFERENCE_VM": (emp_model.E1_REFERENCE_VM, "50000"),
+        "GE_YIELD_EXPONENT": (emp_model.YIELD_SCALING_EXPONENT, "0.85"),
+    }
+
+    @staticmethod
+    def _sections() -> dict[str, str]:
+        return {
+            path.name: path.read_text(encoding="utf-8")
+            for path in sorted(PACKAGE_ROOT.glob("manuscript/[0-9][0-9]_*.md"))
+        }
+
+    def test_registry_is_non_empty(self) -> None:
+        # Guard against a vacuous sweep if the registry is ever emptied.
+        assert len(self.REGISTRY) >= 10
+
+    @staticmethod
+    def _as_number(rendered: str) -> float:
+        """Parse a token value, including the LaTeX scientific form."""
+        return float(rendered.replace("\\times 10^{", "e").replace("}", ""))
+
+    def test_every_registered_token_resolves_to_its_module_constant(self) -> None:
+        variables = generate_variables()
+        for token, (constant, _literal) in self.REGISTRY.items():
+            assert token in variables, f"{token} missing from generate_variables()"
+            assert self._as_number(variables[token]) == pytest.approx(constant, rel=1e-4), token
+
+    def test_every_registered_token_is_actually_used_in_the_manuscript(self) -> None:
+        used: set[str] = set()
+        for text in self._sections().values():
+            used.update(_TOKEN_ARG.findall(text))
+        unused = sorted(set(self.REGISTRY) - used)
+        assert unused == [], f"registered model constants never referenced in prose: {unused}"
+
+    def test_no_registered_constant_is_retyped_as_a_literal(self) -> None:
+        offenders: list[str] = []
+        for name, text in self._sections().items():
+            for token, (_constant, literal) in self.REGISTRY.items():
+                if literal in text:
+                    offenders.append(f"{name}: {literal!r} retyped instead of {{{{{token}}}}}")
+        assert offenders == [], "\n".join(offenders)
+
+
 def test_deepened_tokens_present_and_sensible() -> None:
     v = generate_variables()
     assert float(v["GE_ORBIT_PERIOD_MIN"]) > 80.0
     assert 7.0 < float(v["GE_ORBIT_SPEED_KMS"]) < 8.0
     assert float(v["GE_COUPLING_INDUCED_V"]) > 10000.0
-    assert float(v["GE_COUPLING_SE_DB"]) > 200.0
+    # 0.1 mm aluminium at 100 MHz: 106.0 dB absorption + 86.3 dB reflection.
+    # Pinned to the hand-computed physics, not re-derived from the module.
+    assert float(v["GE_COUPLING_SE_DB"]) == pytest.approx(192.3, abs=0.5)
     assert float(v["GE_GRID_SERVED_FRACTION"]) > 0.0
     assert int(v["GE_GRID_MIN_DISJOINT_PATHS"]) >= 2
-    assert float(v["GE_BREACH_WIDTH_M"]) > 100.0
+    # Froehlich (2008) with the correct K0 = 1.3: 0.27*1.3*(1.3e8)^0.32*75^0.04.
+    assert float(v["GE_BREACH_WIDTH_M"]) == pytest.approx(164.7, abs=0.5)
     assert int(v["GE_NUM_STATIONS"]) == 3
     assert float(v["GE_MEAN_OUTFLOW_CMS"]) > 0.0

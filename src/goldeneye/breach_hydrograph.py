@@ -4,7 +4,7 @@ Extends the Arkangel breach-flood model (:mod:`goldeneye.dam_security`) with
 the time dimension of the flood:
 
 * **Average breach width** — the Froehlich (2008) embankment-dam regression
-  ``B_avg = 0.27 * K0 * V^0.32 * H^0.04`` (``K0 = 1.4`` for overtopping,
+  ``B_avg = 0.27 * K0 * V^0.32 * H^0.04`` (``K0 = 1.3`` for overtopping,
   ``1.0`` for piping failure);
 * **Triangular outflow hydrograph** — a volume-conserving linear recession
   from the peak outflow (Froehlich 1995, see ``dam_security``) to zero over
@@ -33,6 +33,9 @@ from goldeneye.dam_security import (
 __all__ = [
     "FROEHLICH_OVERTOPPING_FACTOR",
     "FROEHLICH_PIPING_FACTOR",
+    "FROEHLICH_WIDTH_COEFFICIENT",
+    "FROEHLICH_WIDTH_HEAD_EXPONENT",
+    "FROEHLICH_WIDTH_VOLUME_EXPONENT",
     "Station",
     "breach_average_width_m",
     "breach_hydrograph_report",
@@ -43,8 +46,19 @@ __all__ = [
 ]
 
 #: Froehlich (2008) breach-width factors: overtopping vs piping failure.
-FROEHLICH_OVERTOPPING_FACTOR = 1.4
+#: ``K0 = 1.3`` for overtopping, ``1.0`` otherwise — the coefficients of the
+#: *2008* regression, as tabulated in the USACE HEC-RAS technical reference.
+#: (``K0 = 1.4`` belongs to Froehlich's earlier *1995* breach-width equation
+#: ``B_avg = 0.1803 K0 V^0.32 H^0.19``, a different regression; using it here
+#: was a 7.7% overstatement of the breach width.)
+FROEHLICH_OVERTOPPING_FACTOR = 1.3
 FROEHLICH_PIPING_FACTOR = 1.0
+
+#: Froehlich (2008) breach-width regression coefficient and exponents:
+#: ``B_avg = 0.27 * K0 * V^0.32 * H^0.04``.
+FROEHLICH_WIDTH_COEFFICIENT = 0.27
+FROEHLICH_WIDTH_VOLUME_EXPONENT = 0.32
+FROEHLICH_WIDTH_HEAD_EXPONENT = 0.04
 
 
 @dataclass(frozen=True)
@@ -76,7 +90,12 @@ def breach_average_width_m(volume_m3: float, head_m: float, overtopping: bool = 
     if volume_m3 <= 0 or head_m <= 0:
         raise ValueError("volume_m3 and head_m must both be > 0")
     k0 = FROEHLICH_OVERTOPPING_FACTOR if overtopping else FROEHLICH_PIPING_FACTOR
-    return float(0.27 * k0 * float(volume_m3) ** 0.32 * float(head_m) ** 0.04)
+    return float(
+        FROEHLICH_WIDTH_COEFFICIENT
+        * k0
+        * float(volume_m3) ** FROEHLICH_WIDTH_VOLUME_EXPONENT
+        * float(head_m) ** FROEHLICH_WIDTH_HEAD_EXPONENT
+    )
 
 
 def hydrograph_duration_s(volume_m3: float, peak_q_cms: float) -> float:

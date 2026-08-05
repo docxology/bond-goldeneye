@@ -18,8 +18,15 @@ are generated into `docs/_generated/COUNTS.md` and never hardcoded in prose.
 
 The layer contract is enforced by the test suite itself, not by a separate
 script: `tests/test_mission.py::TestPureCoreWithoutBondApi` spawns a subprocess
-with `bond_api`/`bond_utilities` removed and imports the pure core, and the
-zero-mock audit below is a one-line grep over `tests/`.
+that installs a `sys.meta_path` finder raising `ImportError` on any
+`bond_api`/`bond_utilities` import, then exercises the pure core — so a BOND
+import at module scope *or* inside a called function fails the run. The
+subprocess self-checks that the blocker fires (positive control), and a
+companion test imports `goldeneye.mission` under the same blocker and asserts
+it fails (negative control), so the gate cannot go quietly inert. Note the
+packages are still installed in the environment; the guarantee is "the core
+never imports them", not "the core runs on a machine where they are absent".
+The zero-mock audit below is a one-line grep over `tests/`.
 
 ## Concept payload (the deep core)
 

@@ -26,8 +26,14 @@ uses a real subprocess (the CLI smoke tests and the pure-core isolation proof).
   declare that fact to the protocol, not to seed anything.
 - `test_scenario.py` asserts two runs of `analyze_arkangel(ARKANGEL)` are
   identical.
-- `test_mission.py::TestPureCoreWithoutBondApi` runs a subprocess proving the
-  pure domain core imports with `bond_api` and `bond_utilities` absent.
+- `test_mission.py::TestPureCoreWithoutBondApi` runs a subprocess in which any
+  `bond_api`/`bond_utilities` import raises `ImportError` (a `sys.meta_path`
+  blocker, self-verified by a positive control), then imports and exercises the
+  pure domain core. Both packages remain installed — what is proven is that the
+  core never imports them, at module scope or lazily, not that it would run in
+  an environment where they are missing. A companion test imports the adapter
+  `goldeneye.mission` under the same blocker and requires it to fail, so an
+  inert blocker is caught.
 - No wall-clock value reaches a persisted analysis artifact;
   `Provenance.wall_time_s` is fixed at 0.0 for exactly this reason.
 

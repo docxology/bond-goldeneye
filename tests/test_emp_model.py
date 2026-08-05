@@ -7,6 +7,9 @@ envelope's analytic limits, waveform normalization, and the component registry.
 from __future__ import annotations
 
 import math
+import subprocess
+import sys
+from pathlib import Path
 
 import pytest
 
@@ -200,3 +203,52 @@ def test_math_consistency_guard() -> None:
     # At the horizon the slant range must exceed the burst altitude.
     assert d > h
     assert math.isfinite(d)
+
+
+class TestGammaFractionIsReportedNotConsumed:
+    """`GAMMA_YIELD_FRACTION` is documentation, and the docs must say so.
+
+    The manuscript previously listed the prompt-gamma fraction among the
+    parameters of the field envelope. It is not one: the envelope is anchored
+    empirically at ``E1_REFERENCE_VM``. This test enforces the corrected,
+    weaker claim by mutating the constant in a fresh interpreter and showing
+    every computed field is byte-identical — and it carries a positive control
+    so the mutation harness cannot silently no-op.
+    """
+
+    _PROBE = (
+        "import goldeneye.emp_model as m\n"
+        "probes = lambda: (\n"
+        "    m.peak_e_field_at_nadir_vm(300.0, 2000.0),\n"
+        "    m.peak_e_field_vm(500.0, 300.0, 2000.0),\n"
+        "    m.yield_scaling_factor(2000.0),\n"
+        "    m.effective_attenuation_length_km(300.0),\n"
+        "    m.component_amplitude_vm('E3', yield_kt=2000.0, e1_peak_vm=1.0),\n"
+        ")\n"
+        "before = probes()\n"
+        "m.GAMMA_YIELD_FRACTION = 0.5\n"
+        "assert probes() == before, 'gamma fraction DOES feed the envelope'\n"
+        "# Positive control: a constant that IS consumed must move the result.\n"
+        "m.E1_REFERENCE_VM = 1.0\n"
+        "assert probes() != before, 'mutation harness is inert — gate vacuous'\n"
+        "print('gamma-unused-ok')\n"
+    )
+
+    def test_mutating_gamma_fraction_changes_no_field(self) -> None:
+        proc = subprocess.run(
+            [sys.executable, "-c", self._PROBE],
+            cwd=str(Path(__file__).resolve().parents[1]),
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert proc.returncode == 0, proc.stderr
+        assert "gamma-unused-ok" in proc.stdout
+
+    def test_constant_is_not_read_by_any_module_function(self) -> None:
+        source = (Path(__file__).resolve().parents[1] / "src/goldeneye/emp_model.py").read_text(encoding="utf-8")
+        # Definition, __all__ entry, and docstring mentions only — no call site.
+        code_lines = [
+            line for line in source.splitlines() if "GAMMA_YIELD_FRACTION" in line and not line.lstrip().startswith("#")
+        ]
+        assert code_lines == ['    "GAMMA_YIELD_FRACTION",', "GAMMA_YIELD_FRACTION = 0.003"], code_lines

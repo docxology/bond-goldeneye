@@ -23,7 +23,8 @@ from typing import Any
 import numpy as np
 import yaml
 
-from goldeneye import emp_model
+from goldeneye import breach_hydrograph, dam_security, emp_model, orbital_mechanics
+from goldeneye import coupling as coupling_module
 from goldeneye.kill_radius import VULNERABILITY_CLASSES
 from goldeneye.scenario import analyze_arkangel, load_scenario_config
 
@@ -44,6 +45,17 @@ _TOKEN_RE = re.compile(r"\{\{[A-Z0-9_]+\}\}")
 def _fmt(value: float, ndigits: int = 1) -> str:
     """Format a float to ``ndigits`` decimals (strip trailing zeros)."""
     return f"{float(value):.{ndigits}f}"
+
+
+def _latex_scientific(value: float, ndigits: int = 6) -> str:
+    """Render a large constant as LaTeX scientific notation for math mode.
+
+    ``3.986004418e14`` -> ``3.986004\\times 10^{14}``. Derived from the value,
+    so a change to the module constant flows through to the manuscript.
+    """
+    exponent = int(math.floor(math.log10(abs(float(value)))))
+    mantissa = float(value) / 10.0**exponent
+    return f"{mantissa:.{ndigits}f}\\times 10^{{{exponent}}}"
 
 
 def load_manuscript_config(config_path: str | Path | None = None) -> dict[str, Any]:
@@ -129,6 +141,22 @@ def generate_variables(
         "GE_REFERENCE_YIELD_KT": _fmt(emp_model.REFERENCE_YIELD_KT, 0),
         "GE_GAMMA_FRACTION_PCT": _fmt(emp_model.GAMMA_YIELD_FRACTION * 100.0, 1),
         "GE_YIELD_EXPONENT": _fmt(emp_model.YIELD_SCALING_EXPONENT, 2),
+        # --- Model constants owned by their defining module (rule 6) ---
+        # Every empirical coefficient quoted in the methodology resolves here,
+        # so a constant change cannot leave the prose stale. Enforced by
+        # tests/test_manuscript_variables.py::TestModelConstantsAreTokenized.
+        "GE_FROEHLICH_PEAK_COEFF": _fmt(dam_security.FROEHLICH_PEAK_COEFFICIENT, 3),
+        "GE_FROEHLICH_PEAK_VOL_EXP": _fmt(dam_security.FROEHLICH_PEAK_VOLUME_EXPONENT, 3),
+        "GE_FROEHLICH_PEAK_HEAD_EXP": _fmt(dam_security.FROEHLICH_PEAK_HEAD_EXPONENT, 2),
+        "GE_RITTER_DEPTH_COEFF": _fmt(dam_security.RITTER_DEPTH_COEFFICIENT, 4),
+        "GE_FROEHLICH_WIDTH_COEFF": _fmt(breach_hydrograph.FROEHLICH_WIDTH_COEFFICIENT, 2),
+        "GE_FROEHLICH_K0_OVERTOPPING": _fmt(breach_hydrograph.FROEHLICH_OVERTOPPING_FACTOR, 1),
+        "GE_FROEHLICH_K0_PIPING": _fmt(breach_hydrograph.FROEHLICH_PIPING_FACTOR, 1),
+        "GE_FROEHLICH_WIDTH_VOL_EXP": _fmt(breach_hydrograph.FROEHLICH_WIDTH_VOLUME_EXPONENT, 2),
+        "GE_FROEHLICH_WIDTH_HEAD_EXP": _fmt(breach_hydrograph.FROEHLICH_WIDTH_HEAD_EXPONENT, 2),
+        "GE_ABSORPTION_DB_PER_SKIN_DEPTH": _fmt(coupling_module.ABSORPTION_DB_PER_SKIN_DEPTH, 3),
+        "GE_FREE_SPACE_IMPEDANCE_OHM": _fmt(coupling_module.FREE_SPACE_IMPEDANCE_OHM, 1),
+        "GE_MU_EARTH_M3S2": _latex_scientific(orbital_mechanics.MU_EARTH),
         # --- EMP threat ---
         "GE_YIELD_KT": _fmt(emp["yield_kt"]),
         "GE_BURST_ALTITUDE_KM": _fmt(emp["burst_altitude_km"]),

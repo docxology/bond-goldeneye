@@ -9,7 +9,8 @@ claims:
   - claim_id: emp-gamma-yield-fraction
     kind: number
     value: 0.003
-    source: src/goldeneye/emp_model.py GAMMA_YIELD_FRACTION (Glasstone & Dolan prompt-gamma fraction)
+    source: src/goldeneye/emp_model.py GAMMA_YIELD_FRACTION (Glasstone & Dolan prompt-gamma
+      fraction; documented provenance for the amplitude anchor, NOT read by any envelope function)
     source_tier: literature_cited
     freshness: active
     artifact_path: manuscript/02_methodology.md
@@ -98,7 +99,7 @@ claims:
     artifact_path: manuscript/03_results.md
   - claim_id: coupling-se-arkangel
     kind: number
-    value: 269.8
+    value: 192.3
     source: src/goldeneye/coupling.py schelkunoff_se_db (0.1 mm aluminium @ 100 MHz, dB)
     source_tier: generated_metric
     freshness: active
@@ -119,8 +120,8 @@ claims:
     artifact_path: manuscript/03_results.md
   - claim_id: breach-width-arkangel
     kind: number
-    value: 177.4
-    source: src/goldeneye/breach_hydrograph.py breach_average_width_m (Froehlich 2008, m)
+    value: 164.7
+    source: src/goldeneye/breach_hydrograph.py breach_average_width_m (Froehlich 2008, K0=1.3, m)
     source_tier: generated_metric
     freshness: active
     artifact_path: manuscript/03_results.md

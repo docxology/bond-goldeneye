@@ -174,11 +174,39 @@ class TestDiscovery:
 
 
 class TestPureCoreWithoutBondApi:
+    #: Installed into ``sys.meta_path`` in the child interpreter so that *any*
+    #: attempt to import a BOND layer raises, rather than merely being absent
+    #: from ``sys.modules`` afterwards. Without this the check was passive: a
+    #: lazily-imported ``bond_api`` inside a core function would have gone
+    #: unnoticed, and both packages remained fully importable.
+    _BLOCKER = (
+        "import sys\n"
+        "class _BondLayerBlocker:\n"
+        "    BLOCKED = ('bond_api', 'bond_utilities')\n"
+        "    def find_spec(self, name, path=None, target=None):\n"
+        "        if name.split('.')[0] in self.BLOCKED:\n"
+        "            raise ImportError('layer-contract test blocked import of ' + name)\n"
+        "        return None\n"
+        "sys.meta_path.insert(0, _BondLayerBlocker())\n"
+        "for _blocked in ('bond_api', 'bond_utilities'):\n"
+        "    try:\n"
+        "        __import__(_blocked)\n"
+        "    except ImportError:\n"
+        "        pass\n"
+        "    else:\n"
+        "        raise AssertionError('blocker inert for ' + _blocked + ' — gate would be vacuous')\n"
+    )
+
     def test_pure_core_imports_without_bond_api(self) -> None:
-        """The domain core must not pull bond_api transitively."""
+        """The domain core must not pull bond_api, even lazily.
+
+        The child interpreter installs a meta-path finder that raises on any
+        ``bond_api``/``bond_utilities`` import (self-verified by a positive
+        control), then exercises the core. Any BOND-layer import anywhere in
+        the core — at module scope or inside a called function — fails the run.
+        """
         code = (
-            "import sys\n"
-            "from goldeneye.emp_model import EmpWeapon\n"
+            self._BLOCKER + "from goldeneye.emp_model import EmpWeapon\n"
             "from goldeneye.kill_radius import kill_radius_km, VULNERABILITY_CLASSES\n"
             "from goldeneye.dam_security import Reservoir, ritter_depth_m\n"
             "from goldeneye.scenario import ARKANGEL, analyze_arkangel\n"
@@ -199,6 +227,22 @@ class TestPureCoreWithoutBondApi:
         )
         assert proc.returncode == 0, proc.stderr
         assert "pure-core-ok" in proc.stdout
+
+    def test_blocker_actually_blocks_the_adapter(self) -> None:
+        """Negative control: mission.py DOES need bond_api, so it must fail.
+
+        This proves the blocker has teeth. If it were inert, this subprocess
+        would exit 0 and the isolation test above would prove nothing.
+        """
+        proc = subprocess.run(
+            [sys.executable, "-c", self._BLOCKER + "import goldeneye.mission\n"],
+            cwd=str(PROJECT_ROOT),
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert proc.returncode != 0
+        assert "layer-contract test blocked import of bond_api" in proc.stderr
 
     def test_mission_import_requires_bond_api_surface(self) -> None:
         # mission.py is the bond_api adapter; importing it pulls the protocol.

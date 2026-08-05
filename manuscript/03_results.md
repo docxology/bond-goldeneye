@@ -88,7 +88,7 @@ military withstand level.
 The **{{GE_GRID_NUM_NODES}}**-node, **{{GE_GRID_NUM_LINES}}**-line regional network
 loses the nodes **{{GE_GRID_DOWN_NODES}}** to certain failure. It serves an
 expected **{{GE_GRID_EXPECTED_SERVED_MW}}** MW of the
-**{{GE_GRID_TOTAL_CRITICAL_MW}}** MW critical load (**{{GE_GRID_SERVED_FRACTION}}**\\%),
+**{{GE_GRID_TOTAL_CRITICAL_MW}}** MW critical load (**{{GE_GRID_SERVED_FRACTION}}**\%),
 with a worst-case load reliability of **{{GE_GRID_MIN_RELIABILITY}}** and a
 minimum of **{{GE_GRID_MIN_DISJOINT_PATHS}}** redundant routes per critical load.
 The mission-critical facility keeps a **{{GE_FACILITY_RELIABILITY}}** survival

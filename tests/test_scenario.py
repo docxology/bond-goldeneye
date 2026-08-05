@@ -179,7 +179,12 @@ class TestDeepenedAnalysis:
     def test_coupling_metrics(self) -> None:
         c = analyze_arkangel(ARKANGEL)["coupling"]
         assert c["induced_voltage_v"] > 10000.0
-        assert c["se_db"] > 200.0
+        # 0.1 mm aluminium at 100 MHz: 106.0 dB absorption + 86.3 dB
+        # reflection. Pinned to the hand-computed physics; a units-broken
+        # reflection loss would land ~78 dB high and fail here.
+        assert c["absorption_db"] == pytest.approx(106.0, abs=0.5)
+        assert c["reflection_db"] == pytest.approx(86.3, abs=0.5)
+        assert c["se_db"] == pytest.approx(192.3, abs=0.5)
         assert c["shielded_field_vm"] < 1e-3
         assert c["protection_margin_db_military"] > 10.0
 
@@ -191,7 +196,8 @@ class TestDeepenedAnalysis:
 
     def test_hydrograph_metrics(self) -> None:
         h = analyze_arkangel(ARKANGEL)["hydrograph"]
-        assert h["breach_width_m"] > 100.0
+        # Froehlich (2008), K0 = 1.3: 0.27*1.3*(1.3e8)^0.32*75^0.04 = 164.73 m.
+        assert h["breach_width_m"] == pytest.approx(164.73, abs=0.05)
         assert len(h["stations"]) == 3
         assert h["stations"][-1]["distance_km"] > h["stations"][0]["distance_km"]
 

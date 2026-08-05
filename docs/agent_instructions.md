@@ -40,7 +40,15 @@ suggestions. Read this file before modifying any project file.
    map containing a non-finite number. Do not put literal double-brace examples
    inside numbered `NN_*.md` sections. Model constants belong to the module that
    defines them: tokenize them rather than retyping the value in prose, so a
-   constant change cannot leave the manuscript stale.
+   constant change cannot leave the manuscript stale. This is now enforced, not
+   advisory — `tests/test_manuscript_variables.py::TestModelConstantsAreTokenized`
+   holds a registry of empirical model constants and fails if any registered
+   token is missing from the map, is never referenced in prose, or has its
+   literal value retyped into a section. Adding a new empirical coefficient
+   means adding it to that registry too. The exception, stated explicitly: exact
+   rational factors internal to a closed-form solution (Ritter's `1/9g`, `2/3`)
+   are not model constants — they cannot change, so there is nothing to keep in
+   sync. Anything a future edit could plausibly retune is a model constant.
 
 7. **Frozen protocol.** `src/goldeneye/mission.py` implements the frozen
    `bond_api.MissionProvider` surface verbatim. Do not invent your own protocol
