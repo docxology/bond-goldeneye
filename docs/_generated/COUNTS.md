@@ -9,7 +9,7 @@
 
 | Metric | Value |
 | --- | --- |
-| Tests passed | 335 |
+| Tests passed | 344 |
 | Tests failed / skipped | 0 / 0 |
 | Line + branch coverage (src/) | 99.65% |
 | Coverage floor | 90% (line + branch) |
@@ -33,13 +33,14 @@
 | `src/goldeneye/dam_security.py` | 98.79% |
 | `src/goldeneye/orbital_mechanics.py` | 98.36% |
 
-Residual misses are the two defensive branches documented in
-`docs/architecture.md` (`dam_security.py:198`, `orbital_mechanics.py:149`) and
-the max-flow loop's non-exiting back-edge (`grid_resilience.py:257->281`). All
-are unreachable through the public API given upstream invariants that are
-themselves pinned by tests.
+Residual misses are the three sites documented in `docs/architecture.md`:
+the two defensive zero-divide guards (`dam_security.py:198`,
+`orbital_mechanics.py:149`) and the Dijkstra loop's unreachable fall-through in
+`most_reliable_path` (`grid_resilience.py:257->281`, whose `while` always exits
+via its `break`). All are unreachable through the public API given upstream
+invariants that are themselves pinned by tests.
 
 Other gates from the same checkout: `ruff check` clean, `ruff format --check`
-clean (47 files), `mypy src/ scripts/` clean (23 source files).
+clean (48 files), `mypy src/ scripts/` clean (23 source files).
 
 Zero mocks; deterministic; pure core verified importable without bond-api.

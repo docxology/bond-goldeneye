@@ -15,8 +15,13 @@ from goldeneye.scenario import (
     load_scenario_config,
     scenario_input_dict,
 )
-from goldeneye.emp_model import EmpWeapon
+from goldeneye.emp_model import EmpWeapon, energy_density_jm3
 from goldeneye.dam_security import Reservoir
+import goldeneye.emp_model as emp_model_module
+import goldeneye.dam_security as dam_security_module
+import goldeneye.orbital_mechanics as orbital_mechanics_module
+import subprocess
+import sys
 
 
 class TestDefaults:
@@ -301,3 +306,57 @@ class TestOrbitAndCouplingSectionKeys:
         assert coupling["frequency_mhz"] == pytest.approx(ARKANGEL.coupling.e1_frequency_hz / 1e6)
         assert coupling["impedance_ohm"] == ARKANGEL.coupling.impedance_ohm
         assert coupling["military_withstand_vm"] > 0.0
+
+
+class TestEnergyDensityBindsCanonicalConstant:
+    """The analysis must derive the nadir energy density from the canonical
+    ``emp_model.energy_density_jm3`` (and hence ``VACUUM_PERMITTIVITY``), not
+    an inlined copy of the constant. A stale inline value would silently stop
+    tracking a permittivity change; this negative control mutates
+    ``VACUUM_PERMITTIVITY`` in a fresh interpreter and requires the analysis
+    value to move with it."""
+
+    _PROBE = (
+        "import goldeneye.emp_model as m\n"
+        "from goldeneye.scenario import ARKANGEL, analyze_arkangel\n"
+        "nadir = analyze_arkangel(ARKANGEL)['emp']['nadir_field_vm']\n"
+        "a0 = analyze_arkangel(ARKANGEL)['emp']['energy_density_nadir_jm3']\n"
+        "assert a0 == m.energy_density_jm3(nadir)\n"
+        "m.VACUUM_PERMITTIVITY = 8.8541878128e-12 * 2.0\n"
+        "a1 = analyze_arkangel(ARKANGEL)['emp']['energy_density_nadir_jm3']\n"
+        "assert a1 == m.energy_density_jm3(nadir), 'analysis not bound to VACUUM_PERMITTIVITY'\n"
+        "assert a1 != a0, 'mutation harness inert'\n"
+        "print('energy-density-bound-ok')\n"
+    )
+
+    def test_in_place_equals_canonical_function(self) -> None:
+        a = analyze_arkangel(ARKANGEL)
+        assert a["emp"]["energy_density_nadir_jm3"] == pytest.approx(energy_density_jm3(a["emp"]["nadir_field_vm"]))
+
+    def test_quadratic_in_field(self) -> None:
+        a = analyze_arkangel(ARKANGEL)
+        e = a["emp"]["energy_density_nadir_jm3"]
+        assert e == pytest.approx(0.5 * 8.8541878128e-12 * a["emp"]["nadir_field_vm"] ** 2)
+
+    def test_mutating_permittivity_tracks_analysis(self) -> None:
+        proc = subprocess.run(
+            [sys.executable, "-c", self._PROBE],
+            cwd=str(Path(__file__).resolve().parents[1]),
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert proc.returncode == 0, proc.stderr
+        assert "energy-density-bound-ok" in proc.stdout
+
+
+class TestCrossModuleConstants:
+    """Cross-module physical constants that the layer contract keeps in
+    separate (stdlib-only) modules must stay mutually consistent: the Ritter
+    celerity and the EMP geometry would silently diverge if one drifted."""
+
+    def test_gravity_consistent_across_modules(self) -> None:
+        assert dam_security_module.GRAVITY == pytest.approx(emp_model_module.GRAVITATIONAL_ACCELERATION)
+
+    def test_earth_radius_scale_consistent(self) -> None:
+        assert emp_model_module.EARTH_RADIUS_KM * 1000.0 == pytest.approx(orbital_mechanics_module.EARTH_RADIUS_M)

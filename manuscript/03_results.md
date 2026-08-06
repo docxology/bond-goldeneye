@@ -7,7 +7,9 @@ output of the pure domain core.
 ## EMP threat envelope
 
 For the canonical weapon (**{{GE_YIELD_KT}}** kt at **{{GE_BURST_ALTITUDE_KM}}** km),
-the E1 peak field directly under the burst is **{{GE_NADIR_FIELD_VM}}** V/m. The
+the E1 peak field directly under the burst is **{{GE_NADIR_FIELD_VM}}** V/m,
+carrying a peak electromagnetic energy density (0.5·ε₀·E²) of
+**{{GE_NADIR_ENERGY_DENSITY}}** J/m³ at the moment of peak. The
 illuminated footprint is bounded by the geometric horizon at
 **{{GE_HORIZON_RANGE_KM}}** km radius, an area of **{{GE_HORIZON_AREA_KM2}}** km^2.
 Because the prompt-flux absorption is negligible along the vacuum path at this
@@ -47,6 +49,23 @@ of **{{GE_FLOOD_DEPTH_M}}** m — a severity ratio of **{{GE_FLOOD_SEVERITY}}** 
 the facility elevation, rated **{{GE_FLOOD_RISK}}**.
 
 ![Ritter dam-break flood wave](output/figures/flood_wave.png){#fig:flood_wave width=100%}
+
+## Downstream inundation stations
+
+The breach hydrograph reports the front-arrival time, the asymptotic peak
+depth, and the flood-risk rating at every monitored station downstream of the
+dam:
+
+| Station | Distance (km) | Arrival (min) | Peak depth (m) | Risk |
+|---|---|---|---|---|
+| **{{GE_STATION_0_NAME}}** | **{{GE_STATION_0_DIST_KM}}** | **{{GE_STATION_0_ARRIVAL_MIN}}** | **{{GE_STATION_0_DEPTH_M}}** | **{{GE_STATION_0_RISK}}** |
+| **{{GE_STATION_1_NAME}}** | **{{GE_STATION_1_DIST_KM}}** | **{{GE_STATION_1_ARRIVAL_MIN}}** | **{{GE_STATION_1_DEPTH_M}}** | **{{GE_STATION_1_RISK}}** |
+| **{{GE_STATION_2_NAME}}** | **{{GE_STATION_2_DIST_KM}}** | **{{GE_STATION_2_ARRIVAL_MIN}}** | **{{GE_STATION_2_DEPTH_M}}** | **{{GE_STATION_2_RISK}}** |
+
+The frictionless Ritter asymptote gives every station the same peak depth
+**{{GE_STATION_2_DEPTH_M}}** m (**{{GE_RITTER_DEPTH_COEFF}}**H, independent of distance), so the
+differentiating quantity is the front-arrival time: the facility, nearest the
+dam, is the first to be inundated by the **{{GE_FLOOD_RISK}}**-rated wave.
 
 ## Access-control posture
 

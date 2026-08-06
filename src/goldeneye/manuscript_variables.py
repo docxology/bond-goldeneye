@@ -172,6 +172,9 @@ def generate_variables(
         "GE_NADIR_FIELD_VM": _fmt(emp["nadir_field_vm"], 0),
         "GE_HORIZON_RANGE_KM": _fmt(emp["horizon_range_km"], 0),
         "GE_HORIZON_AREA_KM2": _fmt(emp["horizon_area_km2"], 0),
+        # Peak electromagnetic energy density of the E1 field at nadir, bound to
+        # emp_model.energy_density_jm3 (see TestEnergyDensityBindsCanonicalConstant).
+        "GE_NADIR_ENERGY_DENSITY": _fmt(emp["energy_density_nadir_jm3"], 3),
         # --- Vulnerability classes ---
         "GE_NUM_CLASSES": str(len(VULNERABILITY_CLASSES)),
         "GE_CLASS_NAMES": ", ".join(cls.name for cls in VULNERABILITY_CLASSES),
@@ -249,6 +252,18 @@ def generate_variables(
         "PYTHON_VERSION": platform.python_version(),
         "NUMPY_VERSION": np.__version__,
     }
+
+    # Downstream-station table tokens (indexed), each bound to the breach
+    # hydrograph station rows so the manuscript table cannot drift from the
+    # engine. A station-count change drops tokens, which the live cross-reference
+    # gate flags as unresolved in the numbered sections.
+    for _idx, _row in enumerate(stations):
+        _p = f"GE_STATION_{_idx}"
+        variables[f"{_p}_NAME"] = str(_row["name"])
+        variables[f"{_p}_DIST_KM"] = _fmt(_row["distance_km"])
+        variables[f"{_p}_ARRIVAL_MIN"] = _fmt(_row["arrival_time_min"])
+        variables[f"{_p}_DEPTH_M"] = _fmt(_row["peak_depth_m"])
+        variables[f"{_p}_RISK"] = str(_row["risk_rating"])
 
     if require_outputs:
         # Strict mode: refuse to hand the manuscript a token that is NaN or

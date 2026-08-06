@@ -1,134 +1,163 @@
 claims:
-  - claim_id: emp-e1-reference-vm
-    kind: number
-    value: 50000.0
-    source: src/goldeneye/emp_model.py E1_REFERENCE_VM (50 kV/m reference E1 amplitude)
-    source_tier: project_source
-    freshness: active
-    artifact_path: manuscript/02_methodology.md
-  - claim_id: emp-gamma-yield-fraction
-    kind: number
-    value: 0.003
-    source: src/goldeneye/emp_model.py GAMMA_YIELD_FRACTION (Glasstone & Dolan prompt-gamma
-      fraction; documented provenance for the amplitude anchor, NOT read by any envelope function)
-    source_tier: literature_cited
-    freshness: active
-    artifact_path: manuscript/02_methodology.md
-  - claim_id: emp-yield-scaling-exponent
-    kind: number
-    value: 0.85
-    source: src/goldeneye/emp_model.py YIELD_SCALING_EXPONENT (empirical E1 scaling)
-    source_tier: project_source
-    freshness: active
-  - claim_id: emp-nadir-field-arkangel
-    kind: number
-    value: 90125.0
-    source: src/goldeneye/scenario.py analyze_arkangel emp.nadir_field_vm (2 Mt @ 300 km)
-    source_tier: generated_metric
-    freshness: active
-    artifact_path: manuscript/03_results.md
-  - claim_id: horizon-range-arkangel
-    kind: number
-    value: 1978.0
-    source: src/goldeneye/emp_model.py ground_range_to_horizon_km (300 km burst)
-    source_tier: generated_metric
-    freshness: active
-    artifact_path: manuscript/03_results.md
-  - claim_id: kill-radius-unprotected
-    kind: number
-    value: 1978.0
-    source: src/goldeneye/kill_radius.py kill_radius_km on ARKANGEL (horizon-saturated)
-    source_tier: generated_metric
-    freshness: active
-    artifact_path: manuscript/03_results.md
-  - claim_id: kill-radius-legacy-tube
-    kind: number
-    value: 0.0
-    source: src/goldeneye/kill_radius.py kill_radius_km (1 MV/m threshold > 90 kV/m nadir)
-    source_tier: generated_metric
-    freshness: active
-    artifact_path: manuscript/03_results.md
-  - claim_id: froehlich-coefficient
-    kind: number
-    value: 0.607
-    source: src/goldeneye/dam_security.py breach_peak_discharge_cms (Froehlich 1995 Q_p = 0.607 V^0.295 H^1.24)
-    source_tier: literature_cited
-    freshness: active
-    artifact_path: manuscript/02_methodology.md
-  - claim_id: ritter-depth-coefficient
-    kind: number
-    value: 0.4444
-    source: src/goldeneye/dam_security.py RITTER_DEPTH_COEFFICIENT (4/9, Ritter dam-break asymptote)
-    source_tier: project_source
-    freshness: active
-    artifact_path: manuscript/02_methodology.md
-  - claim_id: peak-discharge-arkangel
-    kind: number
-    value: 31759.8
-    source: src/goldeneye/dam_security.py breach_peak_discharge_cms(1.3e8, 75) (m^3/s)
-    source_tier: generated_metric
-    freshness: active
-    artifact_path: manuscript/03_results.md
-  - claim_id: flood-arrival-arkangel
-    kind: number
-    value: 2.458
-    source: src/goldeneye/dam_security.py flood_arrival_time_s at 8 km (min)
-    source_tier: generated_metric
-    freshness: active
-    artifact_path: manuscript/03_results.md
-  - claim_id: access-detection-arkangel
-    kind: number
-    value: 0.987
-    source: src/goldeneye/dam_security.py cumulative_detection_probability (4 default layers)
-    source_tier: generated_metric
-    freshness: active
-    artifact_path: manuscript/03_results.md
-  - claim_id: orbit-period-arkangel
-    kind: number
-    value: 90.375
-    source: src/goldeneye/orbital_mechanics.py circular_orbit_period_s at 300 km (min)
-    source_tier: generated_metric
-    freshness: active
-    artifact_path: manuscript/03_results.md
-  - claim_id: coupling-induced-arkangel
-    kind: number
-    value: 34218.4
-    source: src/goldeneye/coupling.py induced_voltage_v at the facility field (V)
-    source_tier: generated_metric
-    freshness: active
-    artifact_path: manuscript/03_results.md
-  - claim_id: coupling-se-arkangel
-    kind: number
-    value: 192.3
-    source: src/goldeneye/coupling.py schelkunoff_se_db (0.1 mm aluminium @ 100 MHz, dB)
-    source_tier: generated_metric
-    freshness: active
-    artifact_path: manuscript/03_results.md
-  - claim_id: grid-served-fraction
-    kind: number
-    value: 0.284
-    source: src/goldeneye/grid_resilience.py resilience_report served_fraction (canonical grid)
-    source_tier: generated_metric
-    freshness: active
-    artifact_path: manuscript/03_results.md
-  - claim_id: grid-facility-reliability
-    kind: number
-    value: 0.402
-    source: src/goldeneye/grid_resilience.py most_reliable_path hydro->facility_sub reliability
-    source_tier: generated_metric
-    freshness: active
-    artifact_path: manuscript/03_results.md
-  - claim_id: breach-width-arkangel
-    kind: number
-    value: 164.7
-    source: src/goldeneye/breach_hydrograph.py breach_average_width_m (Froehlich 2008, K0=1.3, m)
-    source_tier: generated_metric
-    freshness: active
-    artifact_path: manuscript/03_results.md
-  - claim_id: hydrograph-duration-arkangel
-    kind: number
-    value: 136.4
-    source: src/goldeneye/breach_hydrograph.py hydrograph_duration_s / 60 (min)
-    source_tier: generated_metric
-    freshness: active
-    artifact_path: manuscript/03_results.md
+- claim_id: emp-e1-reference-vm
+  kind: number
+  value: 50000.0
+  source: src/goldeneye/emp_model.py E1_REFERENCE_VM (50 kV/m reference E1 amplitude)
+  source_tier: project_source
+  freshness: active
+  artifact_path: manuscript/02_methodology.md
+  binding: module_attr:emp_model.E1_REFERENCE_VM
+- claim_id: emp-gamma-yield-fraction
+  kind: number
+  value: 0.003
+  source: src/goldeneye/emp_model.py GAMMA_YIELD_FRACTION (Glasstone & Dolan prompt-gamma
+    fraction; documented provenance for the amplitude anchor, NOT read by any envelope
+    function)
+  source_tier: literature_cited
+  freshness: active
+  artifact_path: manuscript/02_methodology.md
+  binding: module_attr:emp_model.GAMMA_YIELD_FRACTION
+- claim_id: emp-yield-scaling-exponent
+  kind: number
+  value: 0.85
+  source: src/goldeneye/emp_model.py YIELD_SCALING_EXPONENT (empirical E1 scaling)
+  source_tier: project_source
+  freshness: active
+  binding: module_attr:emp_model.YIELD_SCALING_EXPONENT
+- claim_id: emp-nadir-field-arkangel
+  kind: number
+  value: 90125.0
+  source: src/goldeneye/scenario.py analyze_arkangel emp.nadir_field_vm (2 Mt @ 300
+    km)
+  source_tier: generated_metric
+  freshness: active
+  artifact_path: manuscript/03_results.md
+  binding: analysis_path:emp.nadir_field_vm
+- claim_id: horizon-range-arkangel
+  kind: number
+  value: 1978.0
+  source: src/goldeneye/emp_model.py ground_range_to_horizon_km (300 km burst)
+  source_tier: generated_metric
+  freshness: active
+  artifact_path: manuscript/03_results.md
+  binding: analysis_path:emp.horizon_range_km
+- claim_id: kill-radius-unprotected
+  kind: number
+  value: 1978.0
+  source: src/goldeneye/kill_radius.py kill_radius_km on ARKANGEL (horizon-saturated)
+  source_tier: generated_metric
+  freshness: active
+  artifact_path: manuscript/03_results.md
+  binding: analysis_path:kill_radius.0.radius_km
+- claim_id: kill-radius-legacy-tube
+  kind: number
+  value: 0.0
+  source: src/goldeneye/kill_radius.py kill_radius_km (1 MV/m threshold > 90 kV/m
+    nadir)
+  source_tier: generated_metric
+  freshness: active
+  artifact_path: manuscript/03_results.md
+  binding: analysis_path:kill_radius.3.radius_km
+- claim_id: froehlich-coefficient
+  kind: number
+  value: 0.607
+  source: src/goldeneye/dam_security.py breach_peak_discharge_cms (Froehlich 1995
+    Q_p = 0.607 V^0.295 H^1.24)
+  source_tier: literature_cited
+  freshness: active
+  artifact_path: manuscript/02_methodology.md
+  binding: module_attr:dam_security.FROEHLICH_PEAK_COEFFICIENT
+- claim_id: ritter-depth-coefficient
+  kind: number
+  value: 0.4444
+  source: src/goldeneye/dam_security.py RITTER_DEPTH_COEFFICIENT (4/9, Ritter dam-break
+    asymptote)
+  source_tier: project_source
+  freshness: active
+  artifact_path: manuscript/02_methodology.md
+  binding: module_attr:dam_security.RITTER_DEPTH_COEFFICIENT
+- claim_id: peak-discharge-arkangel
+  kind: number
+  value: 31759.8
+  source: src/goldeneye/dam_security.py breach_peak_discharge_cms(1.3e8, 75) (m^3/s)
+  source_tier: generated_metric
+  freshness: active
+  artifact_path: manuscript/03_results.md
+  binding: analysis_path:dam.peak_discharge_cms
+- claim_id: flood-arrival-arkangel
+  kind: number
+  value: 2.458
+  source: src/goldeneye/dam_security.py flood_arrival_time_s at 8 km (min)
+  source_tier: generated_metric
+  freshness: active
+  artifact_path: manuscript/03_results.md
+  binding: analysis_path:flood.arrival_time_min
+- claim_id: access-detection-arkangel
+  kind: number
+  value: 0.987
+  source: src/goldeneye/dam_security.py cumulative_detection_probability (4 default
+    layers)
+  source_tier: generated_metric
+  freshness: active
+  artifact_path: manuscript/03_results.md
+  binding: analysis_path:access.detection_probability
+- claim_id: orbit-period-arkangel
+  kind: number
+  value: 90.375
+  source: src/goldeneye/orbital_mechanics.py circular_orbit_period_s at 300 km (min)
+  source_tier: generated_metric
+  freshness: active
+  artifact_path: manuscript/03_results.md
+  binding: analysis_path:orbit.period_min
+- claim_id: coupling-induced-arkangel
+  kind: number
+  value: 34218.4
+  source: src/goldeneye/coupling.py induced_voltage_v at the facility field (V)
+  source_tier: generated_metric
+  freshness: active
+  artifact_path: manuscript/03_results.md
+  binding: analysis_path:coupling.induced_voltage_v
+- claim_id: coupling-se-arkangel
+  kind: number
+  value: 192.3
+  source: src/goldeneye/coupling.py schelkunoff_se_db (0.1 mm aluminium @ 100 MHz,
+    dB)
+  source_tier: generated_metric
+  freshness: active
+  artifact_path: manuscript/03_results.md
+  binding: analysis_path:coupling.se_db
+- claim_id: grid-served-fraction
+  kind: number
+  value: 0.284
+  source: src/goldeneye/grid_resilience.py resilience_report served_fraction (canonical
+    grid)
+  source_tier: generated_metric
+  freshness: active
+  artifact_path: manuscript/03_results.md
+  binding: analysis_path:grid.served_fraction
+- claim_id: grid-facility-reliability
+  kind: number
+  value: 0.402
+  source: src/goldeneye/grid_resilience.py most_reliable_path hydro->facility_sub
+    reliability
+  source_tier: generated_metric
+  freshness: active
+  artifact_path: manuscript/03_results.md
+  binding: analysis_path:grid.per_load.0.reliability
+- claim_id: breach-width-arkangel
+  kind: number
+  value: 164.7
+  source: src/goldeneye/breach_hydrograph.py breach_average_width_m (Froehlich 2008,
+    K0=1.3, m)
+  source_tier: generated_metric
+  freshness: active
+  artifact_path: manuscript/03_results.md
+  binding: analysis_path:hydrograph.breach_width_m
+- claim_id: hydrograph-duration-arkangel
+  kind: number
+  value: 136.4
+  source: src/goldeneye/breach_hydrograph.py hydrograph_duration_s / 60 (min)
+  source_tier: generated_metric
+  freshness: active
+  artifact_path: manuscript/03_results.md
+  binding: analysis_path:hydrograph.duration_min

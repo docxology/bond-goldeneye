@@ -34,6 +34,80 @@ compares bytes — proven able to fail by temporarily reintroducing the clock.
 
 ---
 
+## Round-2 improvement (2026-08-06)
+
+Hostile self-review against the live tree. Baseline was the 2026-08-05 state: **335
+passed / 0 failed / 0 skipped, 99.65% line+branch**, `ruff check`/`ruff format`
+(47 files)/`mypy` (23 source files) clean, zero-mock and lineage greps clean. After this
+round: **344 passed / 0 failed / 0 skipped, 99.65%** (1139 stmts / 2 miss / 3 brpart;
+`manuscript_variables` gained statements), `ruff format --check` clean (48 files), `mypy
+src/ scripts/` clean (23 files), zero-mock clean. The three coverage residuals are
+unchanged and each is now explicitly accounted for in `docs/architecture.md` (D1) and
+`docs/_generated/COUNTS.md` (C2).
+
+### Fixes with test evidence
+
+- **F1 — `scenario.py` inlined the vacuum permittivity.** `analyze_arkangel` computed
+  `energy_density_nadir_jm3` as `0.5 * 8.8541878128e-12 * nadir**2`, duplicating the
+  canonical constant by hand instead of calling the (otherwise dead-in-production)
+  `emp_model.energy_density_jm3`. A change to `VACUUM_PERMITTIVITY` would have silently
+  desynced the reported energy density. Now it calls `energy_density_jm3(nadir_vm)`
+  (`scenario.py:473`). `TestEnergyDensityBindsCanonicalConstant` (3 tests) pins the
+  in-place equality, the quadratic-in-field form, and includes a subprocess negative
+  control that mutates `VACUUM_PERMITTIVITY` in a fresh interpreter and requires the
+  analysis value to track it — this fails on the previous inline copy.
+- **F2 — cross-module physical-constant drift guard.** `dam_security.GRAVITY` and
+  `emp_model.GRAVITATIONAL_ACCELERATION` (and the two Earth-radius constants) are
+  intentionally duplicated across stdlib-only modules (the layer contract forbids the
+  import), so nothing previously stopped one from drifting. `TestCrossModuleConstants`
+  binds `dam_security.GRAVITY == emp_model.GRAVITATIONAL_ACCELERATION` and
+  `emp_model.EARTH_RADIUS_KM*1000 == orbital_mechanics.EARTH_RADIUS_M`; the Ritter
+  celerity and the EMP geometry remain mutually consistent.
+- **V1 (closed) — `data/claim_ledger.yaml` was bound by nothing.** Its 19 rows restated
+  module constants and generated metrics with zero references in `tests/`/`scripts/`.
+  Each row now carries a machine-readable `binding` (`module_attr:<mod>.<ATTR>` or
+  `analysis_path:<dotted-path>`), and `tests/test_claim_ledger.py` (4 tests) resolves
+  every row against `emp_model`/`dam_security`/… or `analyze_arkangel(ARKANGEL)`, with a
+  negative control (halving one `value`) that proves the resolver is not inert. All 19
+  rows matched the live run before binding, so no value was stale.
+- **C2 (closed) — `COUNTS.md` misattributed the third residual.** It read "the max-flow
+  loop's non-exiting back-edge (`grid_resilience.py:257->281`)"; line 257 is the Dijkstra
+  `while` in `most_reliable_path`, not the max-flow routine (which is fully covered).
+  Re-worded to name the Dijkstra loop's unreachable fall-through. No generator script
+  exists for `COUNTS.md` (it is hand-maintained despite the header); the numbers were
+  refreshed from this run.
+- **D1 (closed) — `docs/architecture.md` accounted for two residuals, the run reports
+  three.** The "Deliberately unreachable branches" section now documents all three sites
+  — the two zero-divide guards plus the `grid_resilience.most_reliable_path` loop-exit —
+  so the coverage `Missing` column is fully explained.
+
+### Manuscript deepening (all bound to the live engine, strict regeneration passes)
+
+- **Nadir energy density.** New token `GE_NADIR_ENERGY_DENSITY` (from
+  `emp.energy_density_nadir_jm3`) renders in `03_results.md`: the E1 peak
+  **{{GE_NADIR_FIELD_VM}}** V/m carries **0.036** J/m³ at nadir. This also makes the F1
+  constant binding visible in the paper.
+- **Downstream station table.** New per-station tokens
+  `GE_STATION_{N}_{NAME,DIST_KM,ARRIVAL_MIN,DEPTH_M,RISK}` render a live station table in
+  `03_results.md` (facility / town / bridge with arrival time, peak depth, risk), bound to
+  the breach-hydrograph rows. Generating the tokens from a loop (not a hardcoded count)
+  means a station-count change drops tokens, which the strict cross-reference gate flags.
+- `scripts/z_generate_manuscript_variables.py` re-ran clean in strict mode (9 sections,
+  no unresolved tokens); `output/`, figures, and `docs/_generated/COUNTS.md` refreshed.
+
+### Remaining for a future round
+
+C1 (Unicode in default LaTeX render), V2 (a *sourced* page locator for the reflection-loss
+numbers — do not fabricate), V4 (kill-radius regime-of-validity guard), V5 (parallel
+circuits in the canonical grid), D2 (second opinion on the Ritter rational-factor
+exemption), and the E1–E4 extensions (correlated grid failures, friction-aware routing,
+a sourced E2 amplitude, non-zenith pass geometry) are still open. The new station-table
+severity (all three canonical stations flood at the same 4H/9 peak, differing only in
+arrival time) is an honest consequence of the frictionless Ritter asymptote, already
+stated in `07_scope_and_related_work.md`.
+
+---
+
 ## Open work
 
 ### Correctness

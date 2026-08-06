@@ -16,6 +16,7 @@ computation, never mocks.
 | `test_coupling.py` | skin depth, Schelkunoff SE, conductor coupling, materials |
 | `test_grid_resilience.py` | survival, most-reliable path, edge-disjoint count, report |
 | `test_breach_hydrograph.py` | Froehlich 2008 width, triangular hydrograph, stations |
+| `test_claim_ledger.py` | binds data/claim_ledger.yaml to module constants + live analysis |
 | `test_scenario.py` | ARKANGEL defaults, determinism, input hash, config (incl. orbit/coupling) |
 | `test_mission.py` | protocol conformance, gadgets (20), serialization, discovery, pure-core isolation |
 | `test_manuscript_variables.py` | token map + live cross-reference |

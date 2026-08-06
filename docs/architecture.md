@@ -96,16 +96,23 @@ computes — never changing the table above.
 
 ## Deliberately unreachable branches
 
-Two guards are defensive-only and cannot fire through the public API. They are
-kept so that relaxing an upstream invariant cannot silently introduce a divide
-by zero, and each is commented as such at the call site:
+Three sites are defensive-only and cannot fire through the public API. Two are
+zero-divide guards, kept so that relaxing an upstream invariant cannot silently
+introduce a divide by zero; the third is an algorithmic loop-exit. Each is
+commented as such at the call site, and together they account for the
+`Missing` column of the coverage run:
 
 - `dam_security.expected_detection_time_min` — the zero-detection fallback is
   unreachable while `SecurityLayer` enforces `detection_probability ∈ (0, 1]`.
 - `orbital_mechanics._elevation_from_central_angle_deg` — the `sin(γ) ≤ 0`
   fallback is unreachable while `central_angle_deg` clamps γ to `[0, 180]`.
+- `grid_resilience.most_reliable_path` — the `while len(visited) <
+  len(order)` loop (`grid_resilience.py:257`) never falls through to its
+  re-test exit (`:281`): it always returns via the `break` once `current` is
+  the target or unreachable, given the connected-source graph the report
+  feeds it.
 
-Both invariants are pinned by tests, so relaxing one surfaces there first.
+The invariants are pinned by tests, so relaxing one surfaces there first.
 
 ## The BOND integration seam
 

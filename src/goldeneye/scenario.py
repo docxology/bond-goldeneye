@@ -35,7 +35,12 @@ from goldeneye import breach_hydrograph, dam_security
 from goldeneye.breach_hydrograph import Station
 from goldeneye import coupling as coupling_module
 from goldeneye.dam_security import Reservoir, SecurityLayer
-from goldeneye.emp_model import EmpWeapon, ground_range_to_horizon_km, peak_e_field_at_nadir_vm
+from goldeneye.emp_model import (
+    EmpWeapon,
+    energy_density_jm3,
+    ground_range_to_horizon_km,
+    peak_e_field_at_nadir_vm,
+)
 from goldeneye.grid_resilience import GridLine, GridNode, PowerGrid, resilience_report, node_field_vm
 from goldeneye.kill_radius import (
     VULNERABILITY_CLASSES,
@@ -465,7 +470,7 @@ def analyze_arkangel(scenario: ArkangelScenario = ARKANGEL) -> dict[str, Any]:
             "nadir_field_vm": nadir_vm,
             "horizon_range_km": horizon_km,
             "horizon_area_km2": kill_area_km2(horizon_km),
-            "energy_density_nadir_jm3": 0.5 * 8.8541878128e-12 * nadir_vm**2,
+            "energy_density_nadir_jm3": energy_density_jm3(nadir_vm),
         },
         "kill_radius": kill_table,
         "orbit": orbit,

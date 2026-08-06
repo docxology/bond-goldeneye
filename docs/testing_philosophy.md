@@ -70,6 +70,7 @@ they are documented in `architecture.md` and commented at the call site.
 | `tests/test_dam_security.py` | access control (defense in depth), security score, Froehlich peak outflow, Ritter celerity/depth/velocity/front, arrival time, risk rating, degenerate wave regions |
 | `tests/test_breach_hydrograph.py` | Froehlich (2008) breach width, hydrograph duration and volume conservation, mean outflow, station inundation table, report assembly |
 | `tests/test_scenario.py` | ARKANGEL defaults, config overlay and its validation, deterministic analysis, input hash, orbit/coupling section keys |
+| `tests/test_claim_ledger.py` | binds every `data/claim_ledger.yaml` row to its named module constant or the live `analyze_arkangel` output, with a negative control proving a perturbed value is caught |
 | `tests/test_mission.py` | frozen `bond_api.MissionProvider` conformance, the 20-gadget registry, serialization round-trip, discovery, debrief fallbacks, pure-core isolation |
 | `tests/test_manuscript_variables.py` | token map, live manuscript cross-reference, strict-mode gate with positive control, tree resolution (strict and lenient) |
 | `tests/test_figures.py` | in-process rendering of all three concept figures to real PNGs |
