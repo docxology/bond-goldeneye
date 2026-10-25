@@ -129,7 +129,7 @@ DEFAULT_ACCESS_LAYERS: tuple[SecurityLayer, ...] = (
     ),
 )
 
-_LAYER_INDEX: dict[str, SecurityLayer] = {l.name: l for l in DEFAULT_ACCESS_LAYERS}
+_LAYER_INDEX: dict[str, SecurityLayer] = {layer.name: layer for layer in DEFAULT_ACCESS_LAYERS}
 
 
 def lookup_layer(name: str) -> SecurityLayer:

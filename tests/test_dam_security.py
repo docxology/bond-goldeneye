@@ -78,7 +78,7 @@ class TestAccessControl:
 
     def test_access_corridor_selection(self) -> None:
         corridor, p = access_corridor("checkpoint", DEFAULT_ACCESS_LAYERS, extra_names=("control_room",))
-        assert [l.name for l in corridor] == ["checkpoint", "control_room"]
+        assert [layer.name for layer in corridor] == ["checkpoint", "control_room"]
         assert p == pytest.approx(1 - (1 - 0.6) * (1 - 0.9))
 
     def test_access_corridor_unknown_raises(self) -> None:
