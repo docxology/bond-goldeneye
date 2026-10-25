@@ -18,8 +18,8 @@ authors:
     affiliation: "Active Inference Institute"
     corresponding: true
 
-# Local-only working tree: no remote and no DOI. The publication block is kept
-# intentionally minimal for the fork contract (see the bond suite guardrails).
+# No DOI has been minted, so the publication block stays intentionally minimal;
+# nothing in the codebase renders from it today (see the bond suite guardrails).
 publication:
   github_repository: ""
   repository_url: ""

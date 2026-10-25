@@ -5,9 +5,10 @@ suggestions. Read this file before modifying any project file.
 
 ## Rules
 
-1. **Scope = `projects/working/bond/goldeneye/` exactly.** Never touch sibling
-   packages, bond root files, or the template repo. This is a local-only tree;
-   there is no remote and it must never be pushed.
+1. **Scope = this repository exactly** — the standalone `goldeneye` film package
+   (originally `projects/working/bond/goldeneye` in the suite working tree),
+   published at `github.com/docxology/bond-goldeneye`. Never touch sibling
+   packages or the template repo.
 
 2. **Pure core stays pure.** All seven concept modules — `emp_model.py`,
    `orbital_mechanics.py`, `kill_radius.py`, `coupling.py`,

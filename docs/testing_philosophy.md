@@ -55,7 +55,7 @@ Two conventions follow:
 The manuscript cross-reference test asserts the token set it scanned is
 non-empty before comparing, so it cannot pass vacuously on an empty glob.
 
-Two branches are deliberately unreachable and are *not* chased for coverage;
+Three branches are deliberately unreachable and are *not* chased for coverage;
 they are documented in `architecture.md` and commented at the call site.
 
 ## Test files
@@ -75,6 +75,7 @@ they are documented in `architecture.md` and commented at the call site.
 | `tests/test_manuscript_variables.py` | token map, live manuscript cross-reference, strict-mode gate with positive control, tree resolution (strict and lenient) |
 | `tests/test_figures.py` | in-process rendering of all three concept figures to real PNGs |
 | `tests/test_scripts_smoke.py` | subprocess CLI smoke for every mission phase (exit codes + gitignored artifacts) |
+| `tests/test_reproducibility.py` | byte-identity of the covered regeneration set across two real runs, with the provenance-record exclusion and the wall-clock ban in the token generator |
 
 ## Running
 

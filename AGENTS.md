@@ -71,6 +71,9 @@ uv run mypy src/ scripts/
 rg -n "template[_]code_project" . --glob '!uv.lock' --glob '!.git/**' --glob '!output/**' || echo Clean
 ```
 
+The `uv run` form resolves only inside the suite working tree; `STANDALONE.md`
+records the bare-clone recipe for the same gates.
+
 No mock framework anywhere in `tests/` — real data + computation only.
 
 ## Agent protocol

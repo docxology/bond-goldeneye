@@ -36,7 +36,7 @@ deterministic domain core.
 ## Quick reference
 
 ```bash
-cd projects/working/bond/goldeneye
+# run from the repository root
 uv sync --extra dev
 uv run pytest tests/ --cov=src --cov-fail-under=90   # ≥90% line+branch
 uv run ruff check src/ scripts/ tests/ && uv run ruff format --check src/ scripts/ tests/
@@ -59,6 +59,6 @@ uv run python scripts/z_generate_manuscript_variables.py  # tokens + figures
 
 ## Cross-refs
 
-- Root: `../../AGENTS.md`, `docs/agent_instructions.md` (read-first), `TODO.md`.
+- Root: `../../../AGENTS.md`, `docs/agent_instructions.md` (read-first), `TODO.md`.
 - Protocol (frozen): external skill `bond-suite-package-development`
   `references/bond-api-phase1.md`.

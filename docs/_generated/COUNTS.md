@@ -3,7 +3,7 @@
 > Generated from the last full run; do not hand-edit. Refresh after any
 > source/test change by re-running the coverage gate.
 
-- Project: `projects/working/bond/goldeneye` (BOND film package, GoldenEye: ARKANGEL)
+- Project: `docxology/bond-goldeneye` (BOND film package, GoldenEye: ARKANGEL; from the suite's `projects/working/bond/goldeneye`)
 - Gate: `uv run pytest tests/ --cov=src --cov-fail-under=90` (line + branch)
 - Python 3.14.6, pytest 9.0.2, pytest-cov 7.0.0
 

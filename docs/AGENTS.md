@@ -1,7 +1,7 @@
 # docs/ — Agent-facing documentation
 
-Technical guide for `projects/working/bond/goldeneye/docs/`. Every document is
-a hard constraint for agents working in this package.
+Technical guide for `docs/`. Every document is a hard constraint for agents
+working in this package.
 
 ## File inventory
 

@@ -22,6 +22,7 @@ computation, never mocks.
 | `test_manuscript_variables.py` | token map + live cross-reference |
 | `test_figures.py` | in-process concept-figure rendering (3 figures) |
 | `test_scripts_smoke.py` | subprocess CLI smoke + artifact assertions |
+| `test_reproducibility.py` | two-run byte-identity of the covered regeneration set; wall-clock ban in the token generator |
 
 ## Contract
 

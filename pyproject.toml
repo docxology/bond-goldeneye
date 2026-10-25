@@ -24,6 +24,9 @@ dependencies = [
 ]
 
 [tool.uv.sources]
+# Suite-local packages (neither is on PyPI). These pins name the monorepo
+# working-tree locations, so `uv sync` only resolves inside the suite; a bare
+# clone needs bond_api/bond_utilities on PYTHONPATH — see STANDALONE.md.
 bond-api = { path = "/Users/4d/Documents/GitHub/template/projects/working/bond/bond-api" }
 bond-utilities = { path = "/Users/4d/Documents/GitHub/template/projects/working/bond/bond-utilities" }
 

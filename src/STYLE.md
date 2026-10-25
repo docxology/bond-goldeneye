@@ -3,7 +3,8 @@
 Source style for `src/goldeneye/`:
 
 1. **Type hints + docstrings** on every public function and dataclass.
-2. **Ruff formatting** (88-col default alignment) — `uv run ruff format`.
+2. **Ruff formatting** at the suite line length (120 columns, from the suite
+   root `[tool.ruff]`) — `uv run ruff format`.
 3. **Deterministic math**: prefer `math.*` in the pure core; numpy/matplotlib
    only in `figures/` and `manuscript_variables.py`.
 4. **Named constants**: physical/engineering constants are module-level

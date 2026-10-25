@@ -1,9 +1,10 @@
 # Standalone — GoldenEye: ARKANGEL (BOND film package)
 
-This is a **local-only** working tree in the PROJECT BOND suite
-(`projects/working/bond/goldeneye`). There is **no remote and it must never be
-pushed**; publication sidecars (CITATION.cff, .zenodo.json, codemeta.json)
-therefore carry no DOI or repository URL.
+This tree is a standalone checkout of the PROJECT BOND film package `goldeneye`
+(originally `projects/working/bond/goldeneye` in the suite working tree). Its
+canonical remote is `github.com/docxology/bond-goldeneye`. No DOI has been
+minted, so the publication sidecars (CITATION.cff, .zenodo.json, codemeta.json)
+carry no DOI or repository URL.
 
 ## Purpose
 
@@ -15,12 +16,40 @@ protocol.
 
 ## Run it
 
+Inside the suite working tree, where `[tool.uv.sources]` resolves:
+
 ```bash
 uv sync --extra dev
 uv run pytest tests/ --cov=src --cov-fail-under=90     # zero-mock, ≥90% line+branch
 uv run python scripts/execute.py                       # full analysis → output/data/
 uv run python scripts/z_generate_manuscript_variables.py  # tokens + figures
 ```
+
+## Bare clone
+
+`bond-api` and `bond-utilities` are suite-local packages: neither is on PyPI,
+and `[tool.uv.sources]` in `pyproject.toml` pins the monorepo working-tree
+paths, so `uv sync` cannot resolve them here. Every gate still runs once the two
+packages are on the interpreter path:
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install numpy matplotlib pyyaml pytest pytest-cov ruff mypy
+PYTHONPATH=src:<dir holding bond_api/ and bond_utilities/> \
+  .venv/bin/python -m pytest tests/ --cov=src --cov-fail-under=90
+```
+
+`src` belongs on `PYTHONPATH` (not just in the pytest process) because several
+tests exercise the core in a spawned interpreter, the way an editable install
+of `goldeneye` would expose it inside the suite.
+
+`pyproject.toml` carries the `pytest`, `coverage` and `mypy` settings, so those
+gates behave identically here and in the suite. `ruff` does not: the package
+deliberately inherits `[tool.ruff]` from the suite root, so standalone defaults
+disagree with the committed formatting (`ruff format --check --line-length 120`
+reproduces the suite's clean 48-file result) and newer ruff versions also enable
+rule families this code does not target. Run the full ruff gate through the
+suite's `uv run`.
 
 See `README.md` for the full quick start and `TODO.md` for the build record and
 declared integration points. This package is one of many films implementing the

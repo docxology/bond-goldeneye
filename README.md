@@ -45,6 +45,10 @@ uv run python scripts/debrief.py       # reads the persisted outcome, prints les
 uv run python scripts/z_generate_manuscript_variables.py
 ```
 
+`uv sync` resolves `bond-api` and `bond-utilities` from the suite working tree
+via `[tool.uv.sources]`; those two packages are not on PyPI, so outside the
+suite see `STANDALONE.md` for the bare-clone verification recipe.
+
 Regenerable artifacts land under `output/` (git-ignored): the mission outcome
 (`data/arkangel_outcome.json` in bond-api wire format), the provenance record
 (`data/arkangel_mission.json` via `bond_utilities.mission_io`), the
@@ -131,5 +135,6 @@ stale.
 
 See `AGENTS.md` for the layer contract, `docs/architecture.md` for the
 module-by-module architecture, and `docs/agent_instructions.md` for the
-read-first behavioral rules. This is a **local-only** working tree — there is no
-remote and it must never be pushed.
+read-first behavioral rules. The canonical remote is
+`github.com/docxology/bond-goldeneye`; `STANDALONE.md` records how to install
+and verify this tree outside the suite working tree.
