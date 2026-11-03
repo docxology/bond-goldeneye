@@ -326,8 +326,9 @@ comes from the real ARKANGEL geometry.
   resolves tokens into `output/manuscript/`; rendering belongs to the suite. C1
   and V3 are about not shipping markdown that a renderer cannot consume, not
   about adding a render stage here.
-- **Local-only tree.** No remote; never push. Commit path-scoped inside this
-  repo only (`docs/agent_instructions.md` rule 1).
+- **Tracked at `github.com/docxology/bond-goldeneye` (`origin`, branch `main`).**
+  Commit path-scoped inside this repo only (`docs/agent_instructions.md` rule 1),
+  and never force-push or rewrite history.
 
 ---
 
