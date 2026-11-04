@@ -224,6 +224,49 @@ token and figure is regenerated), or a scenario-level test asserts the analysis
 output is correct for a grid variant that has one.
 *Command:* `uv run python -c "import sys; sys.path.insert(0,'src'); from goldeneye.scenario import ARKANGEL; p=[tuple(sorted((l.node_a,l.node_b))) for l in ARKANGEL.grid.lines]; print(len(p)!=len(set(p)))"` → must print `True`, or the scenario test must exist.
 
+**V6 — the vendoring's `[tool.ruff]` table shadows the suite root's ruff config,
+so the lint gate changed what it measures.** The vendoring adds a `[tool.ruff]`
+table to `pyproject.toml` holding one key, `extend-exclude = ["vendor"]`. Ruff
+selects the *nearest* configuration and does not merge a parent's, so a package
+that previously inherited the suite root's 120-column house rule now runs on
+ruff's defaults — in the suite exactly as in a bare clone. Demonstrated
+2026-11-04 with ruff 0.16.1 in two trees under an identical parent
+`[tool.ruff] line-length = 120`, differing only in whether the table exists:
+without it, `ruff format --check src/ scripts/ tests/` is rc=0 with **48 files
+already formatted**; with it, rc=1 and **26 files would be reformatted, 24 already
+formatted**. The explicit flag no longer fully restores it either:
+`--line-length 120` gives **49 of 50 files**, the exception being
+`scripts/vendor.py`, the vendoring checker, which is conformed to ruff's defaults
+because it ships byte-identical in every film package. Before the table existed,
+this package's documented gate ran with the suite's configuration in effect; the
+same command now reads a different configuration. That is a change in what the
+gate measures, not a finding the vendoring inherited.
+*Done when:* the two configurations are reconciled and stated — either this
+package's table carries the settings the committed formatting was produced under
+(and the checker is conformed to the same width or excluded with a reason), or
+the suite's invocation names its configuration explicitly
+(`--config`/`--line-length`) — and the in-suite result is recorded from a real
+run. The suite tree is not present on the machine that measured this, so the
+in-suite numbers are **unavailable** here, not estimated.
+*Demonstrate:* under a parent that carries `[tool.ruff] line-length = 120`,
+`uv run ruff format --check src/ scripts/ tests/` prints the same result before
+and after the vendoring.
+
+**V7 — the lineage instruction cannot print its stated output.** The block below
+documents `rg -n "template_code_project" . … || echo Clean`, and the pattern is
+written **unbracketed**, so the instruction matches its own line
+(`TODO.md:354`) and the `Clean` branch is unreachable: measured 2026-11-04, rc=0
+with exactly one hit, that line. It also breaks `AGENTS.md`'s correct form
+(`pyproject`-style `template[_]code_project`), because the regex matches this
+file's literal text before any real occurrence is reached — so both documented
+instructions fail for one line's sake. Fix shape, already used in `AGENTS.md`
+and in `bond-from_russia_with_love`: bracket-split the pattern in this file too,
+or exclude the files that quote it.
+*Done when:* the documented command returns zero hits in a tree that carries no
+real lineage string.
+*Demonstrate:* `rg -n "template[_]code_project" . --glob '!uv.lock' --glob
+'!.git/**' --glob '!output/**' --glob '!.venv/**'` → zero hits, exit 1.
+
 ### Documentation
 
 **D1 — `docs/architecture.md:97-108` accounts for two uncovered branches; the
@@ -339,13 +382,17 @@ measured on `2cc0f39`, 2026-08-05.
 
 ```bash
 uv run pytest tests/ --cov=src --cov-fail-under=90
-# → 325 passed, 99.65% line+branch, "Required test coverage of 90% reached"
+# → measured 2026-11-04: 344 passed before the vendoring, 345 after (the added
+#   provenance test); 99.65% line+branch at both ends, "Required test coverage of 90% reached"
 
 uv run ruff check src/ scripts/ tests/
-# → All checks passed!
+# → measured: rc=1, 81 findings under ruff's defaults — the same normalized set at
+#   both ends of the vendoring (V6 names the configuration this command reads)
 
 uv run ruff format --check src/ scripts/ tests/
-# → 46 files already formatted
+# → measured: rc=1, 26 files would be reformatted, 24 already formatted of 50; the
+#   same 26 files before the vendoring, when the inherited 120-column rule made
+#   `--line-length 120` print 48 already formatted (V6)
 
 uv run mypy src/ scripts/
 # → Success: no issues found in 23 source files
@@ -353,7 +400,7 @@ uv run mypy src/ scripts/
 rg -rn "unittest[.]mock|MagicMock|@patch|create_autospec" tests/ || echo Clean
 rg -n "template_code_project" . --glob '!uv.lock' --glob '!.git/**' \
    --glob '!output/**' --glob '!.venv/**' || echo Clean
-# → both print Clean
+# → the first prints Clean; the second prints one hit, this file's own line (V7)
 ```
 
 Regenerate artifacts after any change to the public surface or the scenario
