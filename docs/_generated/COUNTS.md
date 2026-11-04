@@ -5,11 +5,11 @@
 
 - Project: `docxology/bond-goldeneye` (BOND film package, GoldenEye: ARKANGEL; from the suite's `projects/working/bond/goldeneye`)
 - Gate: `uv run pytest tests/ --cov=src --cov-fail-under=90` (line + branch)
-- Python 3.14.6, pytest 9.0.2, pytest-cov 7.0.0
+- Python 3.14.9, pytest 9.2.0, pytest-cov 7.0.0
 
 | Metric | Value |
 | --- | --- |
-| Tests passed | 344 |
+| Tests passed | 345 |
 | Tests failed / skipped | 0 / 0 |
 | Line + branch coverage (src/) | 99.65% |
 | Coverage floor | 90% (line + branch) |
@@ -40,7 +40,16 @@ the two defensive zero-divide guards (`dam_security.py:198`,
 via its `break`). All are unreachable through the public API given upstream
 invariants that are themselves pinned by tests.
 
-Other gates from the same checkout: `ruff check` clean, `ruff format --check`
-clean (48 files), `mypy src/ scripts/` clean (23 source files).
+Other gates from the same checkout: `ruff check` rc=1 (81 findings) and
+`ruff format --check` rc=1 (26 of 50 files would be reformatted, 24 already
+formatted) — the same 81 findings and the same 26 files at both ends of the
+vendoring, the two new files joining the already-formatted side, under ruff's
+defaults. This package reads those defaults since the vendoring added its own
+`[tool.ruff]` table; this line previously read "`ruff check` clean, `ruff format
+--check` clean (48 files)", which is what the suite root's inherited 120-column
+rule produced. V6 records what the shadowing means and why the table stays
+minimal; the in-suite numbers are unavailable on the machine that measured this.
+`mypy src/ scripts/` clean over 24 source files (23 before the vendoring; the
+checker script is the 24th).
 
 Zero mocks; deterministic; pure core verified importable without bond-api.

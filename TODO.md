@@ -251,21 +251,58 @@ in-suite numbers are **unavailable** here, not estimated.
 *Demonstrate:* under a parent that carries `[tool.ruff] line-length = 120`,
 `uv run ruff format --check src/ scripts/ tests/` prints the same result before
 and after the vendoring.
+*Resolution 2026-11-04 (orchestrator):* the table stays minimal and this row
+carries the measured consequence — re-cutting the 27 recorded patch payloads
+would cost more than the frozen blobs are worth. `scripts/vendor.py`'s
+conformance to ruff's defaults is a **named exception**, stated rather than
+discovered. Having the suite name its configuration explicitly is a separate
+decision, to be taken after the false inheritance sentences are corrected:
+`bond-skyfall` (`README.md:101-103`, `docs/README.md:71`,
+`docs/agent_instructions.md:113`), `bond-spectre`
+(`docs/agent_instructions.md:35,126-128`) and `bond-orchestrator`
+(`AGENTS.md:129`, `README.md:184`, `COUNTS.md:52-53`) each get a small amendment
+in the FYEO shape with their own row; `bond-the_man_with_the_golden_gun` stays
+with the guide lane. The in-suite numbers remain unavailable on this machine,
+not estimated.
 
-**V7 — the lineage instruction cannot print its stated output.** The block below
-documents `rg -n "template_code_project" . … || echo Clean`, and the pattern is
-written **unbracketed**, so the instruction matches its own line
-(`TODO.md:354`) and the `Clean` branch is unreachable: measured 2026-11-04, rc=0
-with exactly one hit, that line. It also breaks `AGENTS.md`'s correct form
-(`pyproject`-style `template[_]code_project`), because the regex matches this
-file's literal text before any real occurrence is reached — so both documented
-instructions fail for one line's sake. Fix shape, already used in `AGENTS.md`
-and in `bond-from_russia_with_love`: bracket-split the pattern in this file too,
-or exclude the files that quote it.
+**V7 — the lineage instruction could not print its stated output; fixed here.**
+The block below documented the audit with the pattern written as literal text
+rather than as `template` + a one-character class + `code_project`, so the
+instruction matched its own line and the `Clean` branch was unreachable:
+measured 2026-11-04 at the pre-vendoring head, exactly one hit — that line,
+`TODO.md:354` as it stood then. The same defect reached `AGENTS.md`'s
+bracketed form from the other side: a literal pattern matches every file that
+quotes it before any real occurrence is reached, so both documented
+instructions failed for one line's sake. Corrected in this change by
+bracket-splitting the pattern here too, as `AGENTS.md` and
+`bond-from_russia_with_love` already do.
 *Done when:* the documented command returns zero hits in a tree that carries no
 real lineage string.
 *Demonstrate:* `rg -n "template[_]code_project" . --glob '!uv.lock' --glob
-'!.git/**' --glob '!output/**' --glob '!.venv/**'` → zero hits, exit 1.
+'!.git/**' --glob '!output/**' --glob '!.venv/**'` → zero hits, exit 1 (measured
+2026-11-04: one hit before this change, zero after).
+
+**V8 — six documented copies of the zero-mock audit carry a flag that corrupts
+the audit's output; fixed here.** The block below, `docs/AGENTS.md:27`,
+`docs/testing_philosophy.md:15`, `docs/agent_instructions.md:28` and `:81`, and
+`tests/AGENTS.md:29` all document the audit as `rg -rn "…" tests/`. In ripgrep
+`-r` is `--replace`, not "recursive" — recursion is the default and line numbers
+are `-n` — so the flag consumes `n` as the replacement text and a hit prints
+with its match replaced and no line number: measured 2026-11-04 against a probe
+file, `rg -rn "needle" <probe>/` printed `probe.py:x = 1  # n here` where
+`rg -n "needle" <probe>/` printed `probe.py:1:x = 1  # needle here`. A clean tree
+prints nothing either way (exit 1), so the defect surfaces exactly when the
+audit fires and its output starts to matter. Measured on 2026-11-04 with
+`rg -n 'rg -rn' Public/bond-*/`, the string appears in exactly six places — all
+of them in this repository, in the five files above — and nowhere else in the
+film packages; after this change the same command returns three lines, all of
+them in this row, which quotes the defect to record it: each site loses the
+`-r`, and this file's copy takes the bracketed token spelling the other five
+already use, so all six now
+read `rg -n "unittest[.]mock|Magic[M]ock|@pat[ch]|create_auto[s]pec" tests/ ||
+echo Clean`.
+*Command:* that command → `Clean` (exit 1) in this tree, and file, line and
+matched text if it ever is not.
 
 ### Documentation
 
@@ -377,8 +414,9 @@ comes from the real ARKANGEL geometry.
 
 ## Verification
 
-All five must pass before any change is done. Expected outcomes are what was
-measured on `2cc0f39`, 2026-08-05.
+All five must pass before any change is done. Each expected outcome below is
+stated with the date it was measured, beside the target it verifies; the block
+was originally anchored to `2cc0f39`, 2026-08-05.
 
 ```bash
 uv run pytest tests/ --cov=src --cov-fail-under=90
@@ -392,15 +430,20 @@ uv run ruff check src/ scripts/ tests/
 uv run ruff format --check src/ scripts/ tests/
 # → measured: rc=1, 26 files would be reformatted, 24 already formatted of 50; the
 #   same 26 files before the vendoring, when the inherited 120-column rule made
-#   `--line-length 120` print 48 already formatted (V6)
+#   `--line-length 120` print 48 already formatted — the flag now leaves
+#   `scripts/vendor.py`, the fleet-identical checker conformed to ruff's defaults
+#   (V6, named exception)
 
 uv run mypy src/ scripts/
-# → Success: no issues found in 23 source files
+# → measured 2026-11-04: Success: no issues found in 24 source files (23 before
+#   the vendoring; the checker script is the 24th)
 
-rg -rn "unittest[.]mock|MagicMock|@patch|create_autospec" tests/ || echo Clean
-rg -n "template_code_project" . --glob '!uv.lock' --glob '!.git/**' \
+rg -n "unittest[.]mock|Magic[M]ock|@pat[ch]|create_auto[s]pec" tests/ || echo Clean
+rg -n "template[_]code_project" . --glob '!uv.lock' --glob '!.git/**' \
    --glob '!output/**' --glob '!.venv/**' || echo Clean
-# → the first prints Clean; the second prints one hit, this file's own line (V7)
+# → both print Clean: the mock audit finds nothing under tests/ (V8 fixed the
+#   command that could not show what it found), and the lineage audit reports
+#   exit 1 with zero hits (V7; it matched its own line before this change)
 ```
 
 Regenerate artifacts after any change to the public surface or the scenario

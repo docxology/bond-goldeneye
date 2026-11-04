@@ -25,7 +25,7 @@ suggestions. Read this file before modifying any project file.
 
 4. **No mock framework.** No `Magic[M]ock`, `mocker.patch`, `unittest[.]mock` in
    tests. Real data + closed-form computation only. Verify:
-   `rg -rn "unittest[.]mock|Magic[M]ock|@pat[ch]|create_auto[s]pec" tests/ || echo Clean`.
+   `rg -n "unittest[.]mock|Magic[M]ock|@pat[ch]|create_auto[s]pec" tests/ || echo Clean`.
 
 5. **Deterministic.** Fixed scenario parameters (declared in
    `manuscript/config.yaml`), a fixed seed of 0, no untracked RNG, and no
@@ -78,6 +78,6 @@ suggestions. Read this file before modifying any project file.
 uv run pytest tests/ --cov=src --cov-fail-under=90
 uv run ruff check src/ scripts/ tests/ && uv run ruff format src/ scripts/ tests/
 uv run mypy src/ scripts/
-rg -rn "unittest[.]mock|Magic[M]ock|@pat[ch]|create_auto[s]pec" tests/ || echo "Clean"
+rg -n "unittest[.]mock|Magic[M]ock|@pat[ch]|create_auto[s]pec" tests/ || echo "Clean"
 rg -n "template[_]code_project" . --glob '!uv.lock' --glob '!.git/**' --glob '!output/**' || echo "Clean"
 ```

@@ -26,7 +26,7 @@ computation, never mocks.
 
 ## Contract
 
-- Zero mocks: `rg -rn "unittest[.]mock|Magic[M]ock|@pat[ch]|create_auto[s]pec" tests/`.
+- Zero mocks: `rg -n "unittest[.]mock|Magic[M]ock|@pat[ch]|create_auto[s]pec" tests/`.
 - Deterministic: fixed inputs, known vectors, analytic limits; byte-identical
   two-run assertions for the analysis.
 - Coverage floor: `uv run pytest tests/ --cov=src --cov-fail-under=90`
