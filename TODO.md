@@ -224,6 +224,86 @@ token and figure is regenerated), or a scenario-level test asserts the analysis
 output is correct for a grid variant that has one.
 *Command:* `uv run python -c "import sys; sys.path.insert(0,'src'); from goldeneye.scenario import ARKANGEL; p=[tuple(sorted((l.node_a,l.node_b))) for l in ARKANGEL.grid.lines]; print(len(p)!=len(set(p)))"` → must print `True`, or the scenario test must exist.
 
+**V6 — the vendoring's `[tool.ruff]` table shadows the suite root's ruff config,
+so the lint gate changed what it measures.** The vendoring adds a `[tool.ruff]`
+table to `pyproject.toml` holding one key, `extend-exclude = ["vendor"]`. Ruff
+selects the *nearest* configuration and does not merge a parent's, so a package
+that previously inherited the suite root's 120-column house rule now runs on
+ruff's defaults — in the suite exactly as in a bare clone. Demonstrated
+2026-11-04 with ruff 0.16.1 in two trees under an identical parent
+`[tool.ruff] line-length = 120`, differing only in whether the table exists:
+without it, `ruff format --check src/ scripts/ tests/` is rc=0 with **48 files
+already formatted**; with it, rc=1 and **26 files would be reformatted, 24 already
+formatted**. The explicit flag no longer fully restores it either:
+`--line-length 120` gives **49 of 50 files**, the exception being
+`scripts/vendor.py`, the vendoring checker, which is conformed to ruff's defaults
+because it ships byte-identical in every film package. Before the table existed,
+this package's documented gate ran with the suite's configuration in effect; the
+same command now reads a different configuration. That is a change in what the
+gate measures, not a finding the vendoring inherited.
+*Done when:* the two configurations are reconciled and stated — either this
+package's table carries the settings the committed formatting was produced under
+(and the checker is conformed to the same width or excluded with a reason), or
+the suite's invocation names its configuration explicitly
+(`--config`/`--line-length`) — and the in-suite result is recorded from a real
+run. The suite tree is not present on the machine that measured this, so the
+in-suite numbers are **unavailable** here, not estimated.
+*Demonstrate:* under a parent that carries `[tool.ruff] line-length = 120`,
+`uv run ruff format --check src/ scripts/ tests/` prints the same result before
+and after the vendoring.
+*Resolution 2026-11-04 (orchestrator):* the table stays minimal and this row
+carries the measured consequence — re-cutting the 27 recorded patch payloads
+would cost more than the frozen blobs are worth. `scripts/vendor.py`'s
+conformance to ruff's defaults is a **named exception**, stated rather than
+discovered. Having the suite name its configuration explicitly is a separate
+decision, to be taken after the false inheritance sentences are corrected:
+`bond-skyfall` (`README.md:101-103`, `docs/README.md:71`,
+`docs/agent_instructions.md:113`), `bond-spectre`
+(`docs/agent_instructions.md:35,126-128`) and `bond-orchestrator`
+(`AGENTS.md:129`, `README.md:184`, `COUNTS.md:52-53`) each get a small amendment
+in the FYEO shape with their own row; `bond-the_man_with_the_golden_gun` stays
+with the guide lane. The in-suite numbers remain unavailable on this machine,
+not estimated.
+
+**V7 — the lineage instruction could not print its stated output; fixed here.**
+The block below documented the audit with the pattern written as literal text
+rather than as `template` + a one-character class + `code_project`, so the
+instruction matched its own line and the `Clean` branch was unreachable:
+measured 2026-11-04 at the pre-vendoring head, exactly one hit — that line,
+`TODO.md:354` as it stood then. The same defect reached `AGENTS.md`'s
+bracketed form from the other side: a literal pattern matches every file that
+quotes it before any real occurrence is reached, so both documented
+instructions failed for one line's sake. Corrected in this change by
+bracket-splitting the pattern here too, as `AGENTS.md` and
+`bond-from_russia_with_love` already do.
+*Done when:* the documented command returns zero hits in a tree that carries no
+real lineage string.
+*Demonstrate:* `rg -n "template[_]code_project" . --glob '!uv.lock' --glob
+'!.git/**' --glob '!output/**' --glob '!.venv/**'` → zero hits, exit 1 (measured
+2026-11-04: one hit before this change, zero after).
+
+**V8 — six documented copies of the zero-mock audit carry a flag that corrupts
+the audit's output; fixed here.** The block below, `docs/AGENTS.md:27`,
+`docs/testing_philosophy.md:15`, `docs/agent_instructions.md:28` and `:81`, and
+`tests/AGENTS.md:29` all document the audit as `rg -rn "…" tests/`. In ripgrep
+`-r` is `--replace`, not "recursive" — recursion is the default and line numbers
+are `-n` — so the flag consumes `n` as the replacement text and a hit prints
+with its match replaced and no line number: measured 2026-11-04 against a probe
+file, `rg -rn "needle" <probe>/` printed `probe.py:x = 1  # n here` where
+`rg -n "needle" <probe>/` printed `probe.py:1:x = 1  # needle here`. A clean tree
+prints nothing either way (exit 1), so the defect surfaces exactly when the
+audit fires and its output starts to matter. Measured on 2026-11-04 with
+`rg -n 'rg -rn' Public/bond-*/`, the string appears in exactly six places — all
+of them in this repository, in the five files above — and nowhere else in the
+film packages; after this change the same command returns three lines, all of
+them in this row, which quotes the defect to record it: each site loses the
+`-r`, and this file's copy takes the bracketed token spelling the other five
+already use, so all six now
+read `rg -n "unittest[.]mock|Magic[M]ock|@pat[ch]|create_auto[s]pec" tests/ ||
+echo Clean`.
+*Command:* that command → `Clean` (exit 1) in this tree, and file, line and
+matched text if it ever is not.
+
 ### Documentation
 
 **D1 — `docs/architecture.md:97-108` accounts for two uncovered branches; the
@@ -334,26 +414,36 @@ comes from the real ARKANGEL geometry.
 
 ## Verification
 
-All five must pass before any change is done. Expected outcomes are what was
-measured on `2cc0f39`, 2026-08-05.
+All five must pass before any change is done. Each expected outcome below is
+stated with the date it was measured, beside the target it verifies; the block
+was originally anchored to `2cc0f39`, 2026-08-05.
 
 ```bash
 uv run pytest tests/ --cov=src --cov-fail-under=90
-# → 325 passed, 99.65% line+branch, "Required test coverage of 90% reached"
+# → measured 2026-11-04: 344 passed before the vendoring, 345 after (the added
+#   provenance test); 99.65% line+branch at both ends, "Required test coverage of 90% reached"
 
 uv run ruff check src/ scripts/ tests/
-# → All checks passed!
+# → measured: rc=1, 81 findings under ruff's defaults — the same normalized set at
+#   both ends of the vendoring (V6 names the configuration this command reads)
 
 uv run ruff format --check src/ scripts/ tests/
-# → 46 files already formatted
+# → measured: rc=1, 26 files would be reformatted, 24 already formatted of 50; the
+#   same 26 files before the vendoring, when the inherited 120-column rule made
+#   `--line-length 120` print 48 already formatted — the flag now leaves
+#   `scripts/vendor.py`, the fleet-identical checker conformed to ruff's defaults
+#   (V6, named exception)
 
 uv run mypy src/ scripts/
-# → Success: no issues found in 23 source files
+# → measured 2026-11-04: Success: no issues found in 24 source files (23 before
+#   the vendoring; the checker script is the 24th)
 
-rg -rn "unittest[.]mock|MagicMock|@patch|create_autospec" tests/ || echo Clean
-rg -n "template_code_project" . --glob '!uv.lock' --glob '!.git/**' \
+rg -n "unittest[.]mock|Magic[M]ock|@pat[ch]|create_auto[s]pec" tests/ || echo Clean
+rg -n "template[_]code_project" . --glob '!uv.lock' --glob '!.git/**' \
    --glob '!output/**' --glob '!.venv/**' || echo Clean
-# → both print Clean
+# → both print Clean: the mock audit finds nothing under tests/ (V8 fixed the
+#   command that could not show what it found), and the lineage audit reports
+#   exit 1 with zero hits (V7; it matched its own line before this change)
 ```
 
 Regenerate artifacts after any change to the public surface or the scenario

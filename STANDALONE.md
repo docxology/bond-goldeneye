@@ -16,7 +16,7 @@ protocol.
 
 ## Run it
 
-Inside the suite working tree, where `[tool.uv.sources]` resolves:
+From the repository root, where `[tool.uv.sources]` resolves in-tree:
 
 ```bash
 uv sync --extra dev
@@ -27,15 +27,18 @@ uv run python scripts/z_generate_manuscript_variables.py  # tokens + figures
 
 ## Bare clone
 
-`bond-api` and `bond-utilities` are suite-local packages: neither is on PyPI,
-and `[tool.uv.sources]` in `pyproject.toml` pins the monorepo working-tree
-paths, so `uv sync` cannot resolve them here. Every gate still runs once the two
-packages are on the interpreter path:
+`bond-api` and `bond-utilities` are suite-local packages — neither is on PyPI —
+but both are vendored in this tree (`vendor/bond-api`, `vendor/bond-utilities`),
+so `uv sync --extra dev` resolves them with no sibling checkout and the commands
+above run unchanged.
+
+If `uv` is unavailable, the gates still run with the vendored sources on the
+interpreter path:
 
 ```bash
 python3 -m venv .venv
 .venv/bin/pip install numpy matplotlib pyyaml pytest pytest-cov ruff mypy
-PYTHONPATH=src:<dir holding bond_api/ and bond_utilities/> \
+PYTHONPATH=src:vendor/bond-api/src:vendor/bond-utilities/src \
   .venv/bin/python -m pytest tests/ --cov=src --cov-fail-under=90
 ```
 

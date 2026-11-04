@@ -24,6 +24,6 @@ introducing a mock, or hardcoding a manuscript metric.
 
 ```bash
 uv run pytest tests/ --cov=src --cov-fail-under=90
-rg -rn "unittest[.]mock|Magic[M]ock|@pat[ch]|create_auto[s]pec" tests/ || echo Clean
+rg -n "unittest[.]mock|Magic[M]ock|@pat[ch]|create_auto[s]pec" tests/ || echo Clean
 rg -n "^(from|import) (bond_|infrastructure)" src/goldeneye/ || echo Clean
 ```

@@ -19,3 +19,6 @@ build/
 
 # Generated artifacts — regenerate, never hand-edit
 output/
+
+# Build output the vendored copies' own builds write into vendor/.
+vendor/**/build/

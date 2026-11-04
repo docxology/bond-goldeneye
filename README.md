@@ -45,9 +45,10 @@ uv run python scripts/debrief.py       # reads the persisted outcome, prints les
 uv run python scripts/z_generate_manuscript_variables.py
 ```
 
-`uv sync` resolves `bond-api` and `bond-utilities` from the suite working tree
-via `[tool.uv.sources]`; those two packages are not on PyPI, so outside the
-suite see `STANDALONE.md` for the bare-clone verification recipe.
+`uv sync` resolves `bond-api` and `bond-utilities` from `vendor/` via
+`[tool.uv.sources]` — neither is on PyPI, and both are carried in this tree, so a
+clone needs no sibling checkout. `STANDALONE.md` records the bare-clone path and
+the fallback when `uv` is unavailable.
 
 Regenerable artifacts land under `output/` (git-ignored): the mission outcome
 (`data/arkangel_outcome.json` in bond-api wire format), the provenance record

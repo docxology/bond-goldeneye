@@ -12,7 +12,7 @@ stand-in would only test itself. Tests exercise the real algorithms with real
 numbers. Verify:
 
 ```bash
-rg -rn "unittest[.]mock|Magic[M]ock|@pat[ch]|create_auto[s]pec" tests/ || echo Clean
+rg -n "unittest[.]mock|Magic[M]ock|@pat[ch]|create_auto[s]pec" tests/ || echo Clean
 ```
 
 Where a test needs a filesystem it uses `tmp_path` with real files (the
