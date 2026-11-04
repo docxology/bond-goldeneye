@@ -27,8 +27,8 @@ dependencies = [
 # Suite-local packages (neither is on PyPI). These pins name the monorepo
 # working-tree locations, so `uv sync` only resolves inside the suite; a bare
 # clone needs bond_api/bond_utilities on PYTHONPATH — see STANDALONE.md.
-bond-api = { path = "../bond-api" }
-bond-utilities = { path = "../bond-utilities" }
+bond-api = { path = "vendor/bond-api" }
+bond-utilities = { path = "vendor/bond-utilities" }
 
 [project.optional-dependencies]
 dev = [
@@ -75,6 +75,8 @@ exclude_lines = [
 # Project-local mypy settings (the monorepo root config has no mypy_path for
 # this package's src/ layout). Mirrors the bond-api build's proven config:
 # strict-ish typing, explicit package bases, ignore missing stubs.
+# Vendored copies are a dependency; their bytes are bound by scripts/vendor.py.
+exclude = ["(^|/)vendor/"]
 python_version = "3.12"
 mypy_path = ["src"]
 explicit_package_bases = true
@@ -93,3 +95,7 @@ ignore_missing_imports = true
 [tool.setuptools.packages.find]
 # Explicit src-layout discovery so the editable install exposes src/goldeneye.
 where = ["src"]
+
+[tool.ruff]
+# The vendored copies are byte-identical to upstream and must stay that way.
+extend-exclude = ["vendor"]
