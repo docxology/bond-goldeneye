@@ -28,6 +28,30 @@ protocol (brief / recon / plan / execute / debrief) and registers the mission's
 analytical gadgets with the `bond_api.GadgetRegistry`, so the suite's
 orchestrator discovers it by slug.
 
+## Mission model
+
+```mermaid
+flowchart TD
+    accTitle: GoldenEye implemented mission analyses
+    accDescr: Orbital EMP burst geometry, vulnerability thresholds, regional power graph and Arkangel dam layers feed Keplerian platform delivery, E1/E2/E3 burst field and bisection electronics kill radii; Schelkunoff EM shielding margin and post-burst edge-disjoint power-grid resilience; Defense-in-depth dam access risk and volume-conserving downstream breach hydrograph. The mission adapter returns EMP footprint, shielding margins, surviving grid paths and flood wave with provenance, then a debrief.
+    I["Orbital EMP burst geometry, vulnerability thresholds, regional power graph and Arkangel dam layers"]
+    G0["Keplerian platform delivery, E1/E2/E3 burst field and bisection electronics kill radii"]
+    I --> G0
+    G1["Schelkunoff EM shielding margin and post-burst edge-disjoint power-grid resilience"]
+    I --> G1
+    G2["Defense-in-depth dam access risk and volume-conserving downstream breach hydrograph"]
+    I --> G2
+    O["mission.py: execute returns MissionOutcome<br/>EMP footprint, shielding margins, surviving grid paths, flood wave and provenance"]
+    G0 --> O
+    G1 --> O
+    G2 --> O
+    O --> F["debrief: mission summary"]
+```
+
+The branches group implemented capabilities; they do not imply a runtime order.
+
+**Source map:** [`orbital_mechanics.py`](src/goldeneye/orbital_mechanics.py), [`emp_model.py`](src/goldeneye/emp_model.py), [`kill_radius.py`](src/goldeneye/kill_radius.py); [`coupling.py`](src/goldeneye/coupling.py), [`grid_resilience.py`](src/goldeneye/grid_resilience.py); [`dam_security.py`](src/goldeneye/dam_security.py), [`breach_hydrograph.py`](src/goldeneye/breach_hydrograph.py), [`scenario.py`](src/goldeneye/scenario.py); [`mission.py`](src/goldeneye/mission.py).
+
 ## Quick start
 
 ```bash
