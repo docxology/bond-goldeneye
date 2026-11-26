@@ -1,5 +1,7 @@
 # docs/
 
+[Package maintenance](package-maintenance.md) covers dependency and release records.
+
 Agent-facing rulebook for the **GoldenEye: ARKANGEL** BOND film package. These
 documents are hard constraints for anyone — human or agent — changing this
 package. They describe *this* package specifically; none of it is exemplar
