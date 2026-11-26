@@ -1,5 +1,7 @@
 # docs/ — Agent-facing documentation
 
+[Package maintenance](package-maintenance.md) identifies the dependency and citation records.
+
 Technical guide for `docs/`. Every document is a hard constraint for agents
 working in this package.
 
