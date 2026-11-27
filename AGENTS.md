@@ -1,5 +1,8 @@
 # GoldenEye — ARKANGEL (BOND film package)
 
+The [package maintenance guide](docs/package-maintenance.md) records the
+distribution identity, Python selection, dependency provenance, and citation metadata.
+
 **This is a BOND-suite film package**, mission codename **ARKANGEL** (GoldenEye,
 1995). It implements the frozen `bond_api.MissionProvider` protocol over a pure,
 deterministic domain core of seven concept modules. The agent rulebook lives in
