@@ -1,6 +1,7 @@
 # GoldenEye: ARKANGEL — Special-Agent Mission Software
 
-See [package maintenance](docs/package-maintenance.md) for dependency and citation records.
+For the distribution version, checkout Python selection, dependency sources,
+and citation records, see [package maintenance](docs/package-maintenance.md).
 
 A BOND-suite film package for *GoldenEye* (1995), mission codename **ARKANGEL**.
 It models, as deterministic closed-form physics, the coupled threat surfaces
